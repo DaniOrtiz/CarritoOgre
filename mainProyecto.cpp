@@ -10,6 +10,10 @@ Ogre::AnimationState* animationObs04;
 float duration = 4.0f;
 float duration2 = 4.0f;
 
+//Monedas
+int cantMonedas = 20;
+Ogre::SceneNode* nodoMonedas[20];
+bool atrapada[20];
 
 class FrameListenerClase : public Ogre::FrameListener { // Hereda de la clase FrameListener de Ogre, escucha algo
 
@@ -148,6 +152,8 @@ public:
 
 		mSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
 		mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
+		// Cielo estrellado
+		mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
 		
 		Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
 		LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -366,8 +372,51 @@ public:
  		animationObs04 -> setEnabled(true);
  		animationObs04 -> setLoop(true);
 
+		colocarMonedas();
 
 	}
+	void colocarMonedas(){
+		// Tramo 1
+		for( int i = 0 ; i < 5 ; ++i ){
+			crearMonedas(i,200,50,2351);
+		}
+
+		// Tunel
+		for( int i = 5 ; i < 10 ; ++i ){
+			crearMonedas(i,32,2927,4929);
+		}
+		// Tramo 2
+		for( int i = 10 ; i < 15 ; ++i ){
+			crearMonedas(i,200,5505,2351);
+		}
+				
+		// Vacio
+		for( int i = 15 ; i < 20 ; ++i ){
+			crearMonedas(i,200,6535,10305);
+		}
+	}
+	void crearMonedas(int i , int maxX , int minZ , int maxZ ){
+				
+				float cx = rand() % maxX;
+
+				if ( rand() % 2 == 1 ){
+					cx*=-1;
+				}
+
+				float cz = (rand() % (maxZ-minZ))+minZ;
+
+				Ogre::SceneNode* nodoMonedas[20];
+				nodoMonedas[i] = mSceneMgr->createSceneNode("Moneda"+std::to_string(i));
+				mSceneMgr->getRootSceneNode()->addChild(nodoMonedas[i]);
+				
+				Ogre::Entity* _entMoneda = mSceneMgr->createEntity("cilindro01.mesh");
+				_entMoneda->setMaterialName("AndreaCenteno_Estrellas/Monedas");
+				nodoMonedas[i]->setPosition(cx,10.0,cz);
+				nodoMonedas[i]->setScale(3.5f,0.5f,3.5f);
+				nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
+				nodoMonedas[i]->attachObject(_entMoneda);
+			}
+
 
 };
 
