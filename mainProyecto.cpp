@@ -1,5 +1,8 @@
 #include "Ogre\ExampleApplication.h"
 #include <string>
+#include "Ogre\Ogre.h"
+#include "OIS\OIS.h"
+#include <time.h>
 
 
 // Para la animacion de los obstaculos
@@ -104,7 +107,7 @@ public:
         // Animacion Obstaculos
         animationObs01 -> addTime(evt.timeSinceLastFrame);
         animationObs02 -> addTime(evt.timeSinceLastFrame);
-        //animationObs03 -> addTime(evt.timeSinceLastFrame);
+        animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
 
         return true;
@@ -184,6 +187,36 @@ public:
 
     void createScene()
     {
+
+		// Luces Puntuales
+		Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
+		LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
+		LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
+		LuzPuntual01->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+		LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, 1 ));
+
+		Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
+		LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
+		LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
+		LuzPuntual02->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+		LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
+
+				
+		// Luces del tunel
+		
+		Ogre::Light* LucesTunel[10];
+		int posicion = 3050;
+		for (int i = 0; i < 10; ++i) {
+			LucesTunel[i] = mSceneMgr->createLight();
+			LucesTunel[i]->setType(Ogre::Light::LT_POINT);
+			LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
+			LucesTunel[i]->setPosition(Ogre::Vector3(0.0,10.0,posicion));
+			LucesTunel[i]->setCastShadows(false);
+			LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
+
+			posicion = posicion + 200;
+		}
+		
         alasMesh();
 
         mSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
@@ -191,16 +224,6 @@ public:
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
         
-        Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
-        LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
-        LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
-        LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, -1 ));
-        
-        Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
-        LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
-        LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
-        LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
-
         Ogre::Entity* ent01 = mSceneMgr->createEntity("MyEntity1","ejes01.mesh");
         Ogre::SceneNode* node01 = mSceneMgr->createSceneNode("Node01");
         mSceneMgr->getRootSceneNode()->addChild(node01);
@@ -308,6 +331,7 @@ public:
                 
         Ogre::Entity* _entPObstaculo = mSceneMgr->createEntity("PistaObstaculo", "pisoObstaculo01.mesh");
         _nodePObstaculo->attachObject(_entPObstaculo);
+		_entPObstaculo->setMaterialName("circuloneon");
 
         //PisoNOObstaculo
         Ogre::SceneNode* _nodePNObstaculo = mSceneMgr->createSceneNode("PistaNoObstaculo");
@@ -315,7 +339,7 @@ public:
                 
         Ogre::Entity* _entPNOObstaculo = mSceneMgr->createEntity("PistaNoObstaculo", "pisoNoObstaculo01.mesh");
         _nodePNObstaculo->attachObject(_entPNOObstaculo);
-
+		_entPNOObstaculo->setMaterialName("cubito");
 
         //PosterInicioFinal
         Ogre::SceneNode* _nodePoster = mSceneMgr->createSceneNode("PosterInicioFinal");
@@ -414,7 +438,7 @@ public:
         animationObs02 -> setLoop(true);
 
         // Primero a la izquierda
-        /*
+        
         Ogre::Animation* animationObstaculos03 = mSceneMgr -> createAnimation("animationObstaculos03",duration2);
         animationObstaculos03 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackObstaculos03 = animationObstaculos03->createNodeTrack(0,nodosObstaculos[7]);
@@ -422,23 +446,18 @@ public:
         key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(150,3.517,1700));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
+        key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-150,3.517,1500));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(24.0);
+        key3 -> setTranslate(Vector3(-150,3.517,2000));
+        key3 = trackObstaculos03 -> createNodeKeyFrame(10.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-450,3.517,1300));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(28.0);
-        key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-750,3.517,1100));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(1.0);
-        key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-1050,3.517,1700));
+        key3 -> setTranslate(Vector3(-350,3.517,2000));
         
         animationObs03 = mSceneMgr -> createAnimationState("animationObstaculos03");
         animationObs03 -> setEnabled(true);
         animationObs03 -> setLoop(true);
-        */
+        
+		
         // Segundo a la izquierda
         Ogre::Animation* animationObstaculos04 = mSceneMgr -> createAnimation("animationObstaculos04",duration2);
         animationObstaculos04 -> setInterpolationMode(Animation::IM_SPLINE);
@@ -447,14 +466,14 @@ public:
         key4 = trackObstaculos04 -> createNodeKeyFrame(0.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
         key4 -> setTranslate(Vector3(-60,3.517,1800));
-        key4 = trackObstaculos04 -> createNodeKeyFrame(0.4);
+        key4 = trackObstaculos04 -> createNodeKeyFrame(4.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-150,3.517,1700));
+        key4 -> setTranslate(Vector3(-150,3.517,1800));
             
         animationObs04 = mSceneMgr -> createAnimationState("animationObstaculos04");
         animationObs04 -> setEnabled(true);
         animationObs04 -> setLoop(true);
-
+		
         colocarMonedas();
 
     }
@@ -482,11 +501,11 @@ public:
                 
         float cx = rand() % maxX;
 
-        if ( rand() % 2 == 1 ){
-            cx*=-1;
+        if ( (rand() % 2) == 1 ){
+            cx = -1;
         }
 
-        float cz = (rand() % (maxZ-minZ))+minZ;
+        float cz = (rand() % (maxZ-minZ)) + minZ;
 
         Ogre::SceneNode* nodoMonedas[20];
         nodoMonedas[i] = mSceneMgr->createSceneNode("Moneda"+std::to_string(i));
