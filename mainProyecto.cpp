@@ -10,13 +10,15 @@ Ogre::AnimationState* animationObs01;
 Ogre::AnimationState* animationObs02;
 Ogre::AnimationState* animationObs03;
 Ogre::AnimationState* animationObs04;
-float duration = 4.0f;
-float duration2 = 4.0f;
+float duration = 10.0f;
+float duration2 = 10.0f;
 
 //Monedas
 int cantMonedas = 20;
 Ogre::SceneNode* nodoMonedas[20];
 bool atrapada[20];
+
+int puntaje = 0;
 
 class FrameListenerClase : public Ogre::FrameListener { // Hereda de la clase FrameListener de Ogre, escucha algo
 
@@ -399,19 +401,20 @@ public:
         key = trackObstaculos01 -> createNodeKeyFrame(0.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(-150,3.517,1700));
-        key = trackObstaculos01 -> createNodeKeyFrame(4.0);
+        key = trackObstaculos01 -> createNodeKeyFrame(1.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(150,3.517,1500));
-        key = trackObstaculos01 -> createNodeKeyFrame(8.0);
+        key -> setTranslate(Vector3(60,3.517,1600));
+        /*
+		key = trackObstaculos01 -> createNodeKeyFrame(2.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(450,3.517,1300));
-        key = trackObstaculos01 -> createNodeKeyFrame(12.0);
+        key -> setTranslate(Vector3(50,3.517,1500));
+        key = trackObstaculos01 -> createNodeKeyFrame(3.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(750,3.517,1100));
-        key = trackObstaculos01 -> createNodeKeyFrame(16.0);
+        key = trackObstaculos01 -> createNodeKeyFrame(4.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(1050,3.517,900));
-        
+        key -> setTranslate(Vector3(60,3.517,1600));
+        */
         animationObs01 = mSceneMgr -> createAnimationState("animationObstaculos01");
         animationObs01 -> setEnabled(true);
         animationObs01 -> setLoop(true);
@@ -424,10 +427,13 @@ public:
         key2 = trackObstaculos02 -> createNodeKeyFrame(0.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
         key2 -> setTranslate(Vector3(-60,3.517,1800));
-        key2 = trackObstaculos02 -> createNodeKeyFrame(4.0);
+        key2 = trackObstaculos02 -> createNodeKeyFrame(1.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
-        key2 -> setTranslate(Vector3(150,3.517,1700));
-                
+        key2 -> setTranslate(Vector3(-70,3.517,1700));
+		/*key2 = trackObstaculos02 -> createNodeKeyFrame(2.0);
+        key2 ->setScale(Vector3(3.0,3.0,3.0));
+        key2 -> setTranslate(Vector3(50,3.517,1600));
+        */        
         animationObs02 = mSceneMgr -> createAnimationState("animationObstaculos02");
         animationObs02 -> setEnabled(true);
         animationObs02 -> setLoop(true);
@@ -441,13 +447,13 @@ public:
         key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(150,3.517,1700));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
+        key3 = trackObstaculos03 -> createNodeKeyFrame(1.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-150,3.517,2000));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(10.0);
+        key3 -> setTranslate(Vector3(60,3.517,1850));
+        /*key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(-350,3.517,2000));
-        
+        */
         animationObs03 = mSceneMgr -> createAnimationState("animationObstaculos03");
         animationObs03 -> setEnabled(true);
         animationObs03 -> setLoop(true);
@@ -460,16 +466,30 @@ public:
         Ogre::TransformKeyFrame* key4;
         key4 = trackObstaculos04 -> createNodeKeyFrame(0.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-60,3.517,1800));
-        key4 = trackObstaculos04 -> createNodeKeyFrame(4.0);
+        key4 -> setTranslate(Vector3(60,3.517,1800));
+        key4 = trackObstaculos04 -> createNodeKeyFrame(1.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-150,3.517,1800));
-            
+        key4 -> setTranslate(Vector3(-60,3.517,1900));
+        
         animationObs04 = mSceneMgr -> createAnimationState("animationObstaculos04");
         animationObs04 -> setEnabled(true);
         animationObs04 -> setLoop(true);
 		
         colocarMonedas();
+
+		// Luna / Sol Decoración
+		Ogre::SceneNode* nodoLuna = mSceneMgr->createSceneNode("Luna");
+        mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
+        
+        Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
+        //entLuna->setMaterialName("AndreaCenteno_Estrellas/Estrellita");
+        nodoLuna->attachObject(entLuna);
+		nodoLuna->setScale(0.1,0.1,0.1);
+		nodoLuna->setPosition(0,200,10000);
+		
+		
+		Ogre::ParticleSystem* partSystem = mSceneMgr->createParticleSystem("FuegosArtificiales","Examples/Fireworks");
+		nodoLuna->attachObject(partSystem);
 
     }
     void colocarMonedas(){
