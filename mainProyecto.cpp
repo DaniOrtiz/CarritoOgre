@@ -328,7 +328,7 @@ public:
             LucesTunel[i] = mSceneMgr->createLight();
             LucesTunel[i]->setType(Ogre::Light::LT_POINT);
             LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
-            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,10.0,posicion));
+            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,3.5,posicion));
             LucesTunel[i]->setCastShadows(false);
             LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
 
@@ -519,7 +519,7 @@ public:
                 
         Ogre::Entity* _entBPista = mSceneMgr->createEntity("BordePista01", "bordePista.mesh");
         _nodeBPista->attachObject(_entBPista);
-
+		_entBPista->setMaterialName("Cubito/TransparentTest");
 
         //PisoObstaculo
         Ogre::SceneNode* _nodePObstaculo = mSceneMgr->createSceneNode("PistaObstaculo");
@@ -535,7 +535,7 @@ public:
                 
         Ogre::Entity* _entPNOObstaculo = mSceneMgr->createEntity("PistaNoObstaculo", "pisoNoObstaculo01.mesh");
         _nodePNObstaculo->attachObject(_entPNOObstaculo);
-        _entPNOObstaculo->setMaterialName("cubito");
+        _entPNOObstaculo->setMaterialName("Cubito/Cubito");
 
         //PosterInicioFinal
         Ogre::SceneNode* _nodePoster = mSceneMgr->createSceneNode("PosterInicioFinal");
@@ -681,7 +681,7 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
         
         Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
-        //entLuna->setMaterialName("AndreaCenteno_Estrellas/Estrellita");
+        entLuna->setMaterialName("AndreaCenteno_Estrellas/Estrellita");
         nodoLuna->attachObject(entLuna);
         nodoLuna->setScale(0.1,0.1,0.1);
         nodoLuna->setPosition(0,200,10000);
@@ -732,6 +732,7 @@ public:
         nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
         nodoMonedas[i]->attachObject(_entMoneda);
     }
+	
 };
 
 int main (void)

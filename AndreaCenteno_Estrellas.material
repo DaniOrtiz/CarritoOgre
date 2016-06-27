@@ -49,3 +49,21 @@ material AndreaCenteno_Estrellas/Monedas
 		}
 	}
 }
+
+material AndreaCenteno_Estrellas/Estrellita
+{
+	technique
+	{
+		pass
+		{
+			lighting on
+			depth_write off
+
+			texture_unit
+			{
+				texture moneda.png	
+			}
+		}
+	}
+}
+
