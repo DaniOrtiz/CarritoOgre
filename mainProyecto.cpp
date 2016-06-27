@@ -15,7 +15,7 @@ float duration2 = 10.0f;
 
 // animacion carro-nave
 Ogre::AnimationState* animationCar[6];
-#define durationCar 3.0f
+#define durationCar 2.2f
 bool esNave = false;
 int rotRx = 0;
 int rotRy = 0;
@@ -453,59 +453,76 @@ public:
         //ALAS
         Ogre::SceneNode* nodoAla[2];
         Ogre::Entity* entAla[2];
+        Ogre::SceneNode* nodoAlaB[2];
+        Ogre::Entity* entAlaB[2];
+        Ogre::Animation* animationCarrito[2];
+        Ogre::NodeAnimationTrack* trackCarrito[2];
 
-        //CARA DERECHA
-        entAla[0]  = mSceneMgr->createEntity("MeshAlaCara");
-        nodoAla[0] = mSceneMgr->createSceneNode("NodoAlaD");
-        _nodeChasis01->addChild(nodoAla[0]);
-        nodoAla[0]->attachObject(entAla[0]);
-        nodoAla[0]->setScale(0.0,0.0,0.0);
-        //borde
-        Ogre::Entity* entAlaDB = mSceneMgr->createEntity("MeshAlaBorde");
-        Ogre::SceneNode* nodoAlaDB = mSceneMgr->createSceneNode("NodoAlaDB");
-        nodoAla[0]->addChild(nodoAlaDB);
-        nodoAlaDB->attachObject(entAlaDB);
-        //animacion
-        Ogre::Animation* animationCarrito00 = mSceneMgr -> createAnimation("animationCarrito00",durationCar);
-        animationCarrito00 -> setInterpolationMode(Animation::IM_SPLINE);
-        Ogre::NodeAnimationTrack* trackCarrito00 = animationCarrito00->createNodeTrack(0,nodoAla[0]);
+        for (int i = 0; i < 2; i++) {
+            entAla[i]  = mSceneMgr->createEntity("MeshAlaCara");
+            nodoAla[i] = mSceneMgr->createSceneNode("NodoAla"+std::to_string(i+1));
+            _nodeChasis01->addChild(nodoAla[i]);
+            nodoAla[i]->attachObject(entAla[i]);
+            nodoAla[i]->setScale(0.0,0.0,0.0);
+            //borde
+            entAlaB[i] = mSceneMgr->createEntity("MeshAlaBorde");
+            nodoAlaB[i] = mSceneMgr->createSceneNode("NodoAlaB"+std::to_string(i+1));
+            nodoAla[i]->addChild(nodoAlaB[i]);
+            nodoAlaB[i]->attachObject(entAlaB[i]);    
+
+            animationCarrito[i] = mSceneMgr -> createAnimation("animationCarrito"+std::to_string(i+1),durationCar);
+            animationCarrito[i] -> setInterpolationMode(Animation::IM_SPLINE);
+            trackCarrito[i] = animationCarrito[i]->createNodeTrack(0,nodoAla[i]);
+            animationCar[i] = mSceneMgr -> createAnimationState("animationCarrito"+std::to_string(i+1));
+            animationCar[i]->setEnabled(false);
+            animationCar[i]->setLoop(false);     
+        }
+
+        //KeyFrame ala der
         Ogre::TransformKeyFrame* keyCar00;
-        keyCar00 = trackCarrito00 -> createNodeKeyFrame(0.0);
+        keyCar00 = trackCarrito[0] -> createNodeKeyFrame(0.0);
         keyCar00->setTranslate(Vector3(-6,7.0,-4.0));
-        keyCar00 = trackCarrito00 -> createNodeKeyFrame(durationCar);
+        keyCar00 = trackCarrito[0] -> createNodeKeyFrame(durationCar);
         keyCar00->setScale(Vector3(2.5,2.0,2.0));
         keyCar00->setTranslate(Vector3(-1.0,7.0,-4.0));
-        animationCar[0] = mSceneMgr -> createAnimationState("animationCarrito00");
-        animationCar[0]->setEnabled(false);
-        animationCar[0]->setLoop(false);
-
-        //CARA IZQUIERDA
-        entAla[1]  = mSceneMgr->createEntity("MeshAlaCara");
-        nodoAla[1] = mSceneMgr->createSceneNode("NodoAlaI");
-        _nodeChasis01->addChild(nodoAla[1]);
-        nodoAla[1]->attachObject(entAla[1]);
-        nodoAla[1]->setScale(0.0,0.0,0.0);
-        //borde
-        Ogre::Entity* entAlaIB = mSceneMgr->createEntity("MeshAlaBorde");
-        Ogre::SceneNode* nodoAlaIB = mSceneMgr->createSceneNode("NodoAlaIB");
-        nodoAla[1]->addChild(nodoAlaIB);
-        nodoAlaIB->attachObject(entAlaIB);
-        //animacion
-        Ogre::Animation* animationCarrito01 = mSceneMgr -> createAnimation("animationCarrito01",durationCar);
-        animationCarrito01 -> setInterpolationMode(Animation::IM_SPLINE);
-        Ogre::NodeAnimationTrack* trackCarrito01 = animationCarrito01->createNodeTrack(0,nodoAla[1]);
+        //KeyFrame ala izq
         Ogre::TransformKeyFrame* keyCar01;
-        keyCar01 = trackCarrito01 -> createNodeKeyFrame(0.0);
+        keyCar01 = trackCarrito[1] -> createNodeKeyFrame(0.0);
         keyCar01->setTranslate(Vector3(6,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 
-        keyCar01 = trackCarrito01 -> createNodeKeyFrame(durationCar);
+        keyCar01 = trackCarrito[1] -> createNodeKeyFrame(durationCar);
         keyCar01->setTranslate(Vector3(1.0,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 
-        keyCar01->setScale(Vector3(2.5,2.0,2.0));
-        animationCar[1] = mSceneMgr -> createAnimationState("animationCarrito01");
-        animationCar[1]->setEnabled(false);
-        animationCar[1]->setLoop(false);      
+        keyCar01->setScale(Vector3(2.5,2.0,2.0));     
 
+        //Rocas
+        /*
+        Ogre::SceneNode* nodosObstaculos[12];
+        for (int i = 0; i < 12; i++) {
+            nodosObstaculos[i] = mSceneMgr->createSceneNode("NodoObstaculo"+std::to_string(i+1));
+            mSceneMgr->getRootSceneNode()->addChild(nodosObstaculos[i]);
+
+            Ogre::Entity* entObstaculos = mSceneMgr->createEntity("NodoObstaculo"+std::to_string(i+1), "cubo01.mesh");
+
+            nodosObstaculos[i] ->attachObject(entObstaculos);
+            nodosObstaculos[i] ->setScale(3.0,3.0,3.0);
+            
+        }
+            nodosObstaculos[0] ->setPosition(-150,3.517,600);
+            nodosObstaculos[1] ->setPosition(-60,3.517,700);
+            nodosObstaculos[2] ->setPosition(60,3.517,700);
+            nodosObstaculos[3] ->setPosition(150,3.517,600);
+
+            nodosObstaculos[4] ->setPosition(-150,3.517,1700);
+            nodosObstaculos[5] ->setPosition(-60,3.517,1800);
+            nodosObstaculos[6] ->setPosition(60,3.517,1800);
+            nodosObstaculos[7] ->setPosition(150,3.517,1700);
+
+            nodosObstaculos[8] ->setPosition(-150,3.517,5800);
+            nodosObstaculos[9] ->setPosition(-60,3.517,5900);
+            nodosObstaculos[10] ->setPosition(60,3.517,5900);
+            nodosObstaculos[11] ->setPosition(150,3.517,5800);
+*/
         /*    _         _           
       _ __   (_)  ___  | |_    __ _ 
      | '_ \  | | / __| | __|  / _` |
