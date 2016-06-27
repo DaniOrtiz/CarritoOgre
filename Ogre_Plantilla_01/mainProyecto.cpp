@@ -1,5 +1,8 @@
 #include "Ogre\ExampleApplication.h"
 #include <string>
+#include "Ogre\Ogre.h"
+#include "OIS\OIS.h"
+#include <time.h>
 
 
 // Para la animacion de los obstaculos
@@ -104,7 +107,7 @@ public:
         // Animacion Obstaculos
         animationObs01 -> addTime(evt.timeSinceLastFrame);
         animationObs02 -> addTime(evt.timeSinceLastFrame);
-        //animationObs03 -> addTime(evt.timeSinceLastFrame);
+        animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
 
         return true;
@@ -152,10 +155,10 @@ public:
         Ogre::ManualObject* manualAlaCara = mSceneMgr->createManualObject("manualAlaCara");
             manualAlaCara->begin("DanielaOrtiz_Nave/Gris", RenderOperation::OT_TRIANGLE_STRIP);
 
-            manualAlaCara->position(2, 0.3, 6);
-            manualAlaCara->position(8, 0.3, 4);
-            manualAlaCara->position(8, 0.3, 2);
-            manualAlaCara->position(2, 0.3, 0);
+            manualAlaCara->position(2, 0.4, 3);
+            manualAlaCara->position(8, 0.4, 1);
+            manualAlaCara->position(8, 0.4,-1);
+            manualAlaCara->position(2, 0.4,-3);
 
             for(int i = 0; i < 5; i++){
                 manualAlaCara->index(i);
@@ -166,14 +169,14 @@ public:
         Ogre::ManualObject* manualAlaBorde = mSceneMgr->createManualObject("manualAlaBorde");
             manualAlaBorde->begin("DanielaOrtiz_Nave/Gris", RenderOperation::OT_TRIANGLE_STRIP);
 
-            manualAlaBorde->position( 2, 0.3, 6);
-            manualAlaBorde->position( 2, 0.0, 6);
-            manualAlaBorde->position( 8, 0.3, 4);
-            manualAlaBorde->position( 8, 0.0, 4);
-            manualAlaBorde->position( 8, 0.3, 2);
-            manualAlaBorde->position( 8, 0.0, 2);
-            manualAlaBorde->position( 2, 0.3, 0);
-            manualAlaBorde->position( 2, 0.0, 0);
+            manualAlaBorde->position( 2, 0.4, 3);
+            manualAlaBorde->position( 2,-0.4, 3);
+            manualAlaBorde->position( 8, 0.4, 1);
+            manualAlaBorde->position( 8,-0.4, 1);
+            manualAlaBorde->position( 8, 0.4,-1);
+            manualAlaBorde->position( 8,-0.4,-1);
+            manualAlaBorde->position( 2, 0.4,-3);
+            manualAlaBorde->position( 2,-0.4,-3);
 
             for(int i = 0; i < 9; i++){
                 manualAlaBorde->index(i);
@@ -184,27 +187,40 @@ public:
 
     void createScene()
     {
+        // Luces Puntuales
+        Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
+        LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
+        LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
+        LuzPuntual01->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+        LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, 1 ));
+
+        Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
+        LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
+        LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
+        LuzPuntual02->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+        LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
+
+        // Luces del tunel
+        
+        Ogre::Light* LucesTunel[10];
+        int posicion = 3050;
+        for (int i = 0; i < 10; ++i) {
+            LucesTunel[i] = mSceneMgr->createLight();
+            LucesTunel[i]->setType(Ogre::Light::LT_POINT);
+            LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
+            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,10.0,posicion));
+            LucesTunel[i]->setCastShadows(false);
+            LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
+
+            posicion = posicion + 200;
+        }
+        
         alasMesh();
 
         mSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
         mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
-        
-        Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
-        LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
-        LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
-        LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, -1 ));
-        
-        Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
-        LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
-        LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
-        LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
-
-        Ogre::Entity* ent01 = mSceneMgr->createEntity("MyEntity1","ejes01.mesh");
-        Ogre::SceneNode* node01 = mSceneMgr->createSceneNode("Node01");
-        mSceneMgr->getRootSceneNode()->addChild(node01);
-        node01->attachObject(ent01);
 
         /* ___    __ _   _ __   _ __    ___  
           / __|  / _` | | '__| | '__|  / _ \ 
@@ -222,7 +238,7 @@ public:
 
         //Rueda 01 Delantera Derecha
         Ogre::SceneNode* _nodeRueda01 = mSceneMgr->createSceneNode("Rueda01");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda01);
+        _nodeChasis01->addChild(_nodeRueda01);
             
         Ogre::Entity* _entRueda01 = mSceneMgr->createEntity("entRueda01", "ruedaDetallada.mesh");
         _nodeRueda01->translate(-5.77,3.517,9.462);
@@ -231,7 +247,7 @@ public:
 
         //Rueda 02 Delantera Izquierda
         Ogre::SceneNode* _nodeRueda02 = mSceneMgr->createSceneNode("Rueda02");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda02);
+        _nodeChasis01->addChild(_nodeRueda02);
             
         Ogre::Entity* _entRueda02 = mSceneMgr->createEntity("entRueda02", "ruedaDetallada.mesh");
         _nodeRueda02->translate(8,3.517,9.462);
@@ -240,7 +256,7 @@ public:
 
         //Rueda 03 Trasera Derecha
         Ogre::SceneNode* _nodeRueda03 = mSceneMgr->createSceneNode("Rueda03");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda03);
+        _nodeChasis01->addChild(_nodeRueda03);
             
         Ogre::Entity* _entRueda03 = mSceneMgr->createEntity("entRueda03", "ruedaDetallada.mesh");
         _nodeRueda03->translate(-5.77,3.517,-9.462);
@@ -249,7 +265,7 @@ public:
 
         //Rueda 04 Trasera Izquierda
         Ogre::SceneNode* _nodeRueda04 = mSceneMgr->createSceneNode("Rueda04");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda04);
+        _nodeChasis01->addChild(_nodeRueda04);
             
         Ogre::Entity* _entRueda04 = mSceneMgr->createEntity("entRueda04", "ruedaDetallada.mesh");
         _nodeRueda04->translate(8,3.517,-9.462);
@@ -263,12 +279,12 @@ public:
         Ogre::Entity* entAlaD;
 
         //CARA DERECHA
-        entAlaD = mSceneMgr->createEntity("MeshAlaCara");
+        entAlaD  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAlaD = mSceneMgr->createSceneNode("NodoAlaD");
-        nodoAlaD->attachObject(entAlaD);
-        nodoAlaD->translate(0.0,14,0.0);
-        nodoAlaD->setScale(2.5,2.0,2.0);
         _nodeChasis01->addChild(nodoAlaD);
+        nodoAlaD->attachObject(entAlaD);
+        nodoAlaD->translate(-1.0,6.0,-4.0);
+        nodoAlaD->setScale(2.5,2.0,2.0);
         //borde
         Ogre::Entity* entAlaDB = mSceneMgr->createEntity("MeshAlaBorde");
         Ogre::SceneNode* nodoAlaDB = mSceneMgr->createSceneNode("NodoAlaDB");
@@ -276,13 +292,13 @@ public:
         nodoAlaDB->attachObject(entAlaDB);
 
         //CARA IZQUIERDA
-        entAlaI = mSceneMgr->createEntity("MeshAlaCara");
+        entAlaI  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAlaI = mSceneMgr->createSceneNode("NodoAlaI");
-        nodoAlaI->attachObject(entAlaI);
-        nodoAlaI->yaw(Ogre::Degree( 180 ) );
-        nodoAlaI->translate(2,14,0.0);
-        nodoAlaI->setScale(2.5,2.0,2.0);
         _nodeChasis01->addChild(nodoAlaI);
+        nodoAlaI->attachObject(entAlaI);
+        nodoAlaI->translate(1.0,6.0,-4.0);
+        nodoAlaI->yaw(Ogre::Degree( 180 ) );
+        nodoAlaI->setScale(2.5,2.0,2.0);
         //borde
         Ogre::Entity* entAlaIB = mSceneMgr->createEntity("MeshAlaBorde");
         Ogre::SceneNode* nodoAlaIB = mSceneMgr->createSceneNode("NodoAlaIB");
@@ -310,6 +326,7 @@ public:
                 
         Ogre::Entity* _entPObstaculo = mSceneMgr->createEntity("PistaObstaculo", "pisoObstaculo01.mesh");
         _nodePObstaculo->attachObject(_entPObstaculo);
+        _entPObstaculo->setMaterialName("circuloneon");
 
         //PisoNOObstaculo
         Ogre::SceneNode* _nodePNObstaculo = mSceneMgr->createSceneNode("PistaNoObstaculo");
@@ -317,7 +334,7 @@ public:
                 
         Ogre::Entity* _entPNOObstaculo = mSceneMgr->createEntity("PistaNoObstaculo", "pisoNoObstaculo01.mesh");
         _nodePNObstaculo->attachObject(_entPNOObstaculo);
-
+        _entPNOObstaculo->setMaterialName("cubito");
 
         //PosterInicioFinal
         Ogre::SceneNode* _nodePoster = mSceneMgr->createSceneNode("PosterInicioFinal");
@@ -416,7 +433,7 @@ public:
         animationObs02 -> setLoop(true);
 
         // Primero a la izquierda
-        /*
+        
         Ogre::Animation* animationObstaculos03 = mSceneMgr -> createAnimation("animationObstaculos03",duration2);
         animationObstaculos03 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackObstaculos03 = animationObstaculos03->createNodeTrack(0,nodosObstaculos[7]);
@@ -424,23 +441,18 @@ public:
         key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(150,3.517,1700));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
+        key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-150,3.517,1500));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(24.0);
+        key3 -> setTranslate(Vector3(-150,3.517,2000));
+        key3 = trackObstaculos03 -> createNodeKeyFrame(10.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-450,3.517,1300));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(28.0);
-        key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-750,3.517,1100));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(1.0);
-        key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-1050,3.517,1700));
+        key3 -> setTranslate(Vector3(-350,3.517,2000));
         
         animationObs03 = mSceneMgr -> createAnimationState("animationObstaculos03");
         animationObs03 -> setEnabled(true);
         animationObs03 -> setLoop(true);
-        */
+        
+        
         // Segundo a la izquierda
         Ogre::Animation* animationObstaculos04 = mSceneMgr -> createAnimation("animationObstaculos04",duration2);
         animationObstaculos04 -> setInterpolationMode(Animation::IM_SPLINE);
@@ -449,14 +461,14 @@ public:
         key4 = trackObstaculos04 -> createNodeKeyFrame(0.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
         key4 -> setTranslate(Vector3(-60,3.517,1800));
-        key4 = trackObstaculos04 -> createNodeKeyFrame(0.4);
+        key4 = trackObstaculos04 -> createNodeKeyFrame(4.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-150,3.517,1700));
+        key4 -> setTranslate(Vector3(-150,3.517,1800));
             
         animationObs04 = mSceneMgr -> createAnimationState("animationObstaculos04");
         animationObs04 -> setEnabled(true);
         animationObs04 -> setLoop(true);
-
+        
         colocarMonedas();
 
     }
@@ -484,11 +496,11 @@ public:
                 
         float cx = rand() % maxX;
 
-        if ( rand() % 2 == 1 ){
-            cx*=-1;
+        if ( (rand() % 2) == 1 ){
+            cx = -1;
         }
 
-        float cz = (rand() % (maxZ-minZ))+minZ;
+        float cz = (rand() % (maxZ-minZ)) + minZ;
 
         Ogre::SceneNode* nodoMonedas[20];
         nodoMonedas[i] = mSceneMgr->createSceneNode("Moneda"+std::to_string(i));

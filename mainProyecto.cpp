@@ -155,10 +155,10 @@ public:
         Ogre::ManualObject* manualAlaCara = mSceneMgr->createManualObject("manualAlaCara");
             manualAlaCara->begin("DanielaOrtiz_Nave/Gris", RenderOperation::OT_TRIANGLE_STRIP);
 
-            manualAlaCara->position(2, 0.3, 6);
-            manualAlaCara->position(8, 0.3, 4);
-            manualAlaCara->position(8, 0.3, 2);
-            manualAlaCara->position(2, 0.3, 0);
+            manualAlaCara->position(2, 0.4, 3);
+            manualAlaCara->position(8, 0.4, 1);
+            manualAlaCara->position(8, 0.4,-1);
+            manualAlaCara->position(2, 0.4,-3);
 
             for(int i = 0; i < 5; i++){
                 manualAlaCara->index(i);
@@ -169,14 +169,14 @@ public:
         Ogre::ManualObject* manualAlaBorde = mSceneMgr->createManualObject("manualAlaBorde");
             manualAlaBorde->begin("DanielaOrtiz_Nave/Gris", RenderOperation::OT_TRIANGLE_STRIP);
 
-            manualAlaBorde->position( 2, 0.3, 6);
-            manualAlaBorde->position( 2, 0.0, 6);
-            manualAlaBorde->position( 8, 0.3, 4);
-            manualAlaBorde->position( 8, 0.0, 4);
-            manualAlaBorde->position( 8, 0.3, 2);
-            manualAlaBorde->position( 8, 0.0, 2);
-            manualAlaBorde->position( 2, 0.3, 0);
-            manualAlaBorde->position( 2, 0.0, 0);
+            manualAlaBorde->position( 2, 0.4, 3);
+            manualAlaBorde->position( 2,-0.4, 3);
+            manualAlaBorde->position( 8, 0.4, 1);
+            manualAlaBorde->position( 8,-0.4, 1);
+            manualAlaBorde->position( 8, 0.4,-1);
+            manualAlaBorde->position( 8,-0.4,-1);
+            manualAlaBorde->position( 2, 0.4,-3);
+            manualAlaBorde->position( 2,-0.4,-3);
 
             for(int i = 0; i < 9; i++){
                 manualAlaBorde->index(i);
@@ -187,48 +187,40 @@ public:
 
     void createScene()
     {
+        // Luces Puntuales
+        Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
+        LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
+        LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
+        LuzPuntual01->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+        LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, 1 ));
 
-		// Luces Puntuales
-		Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
-		LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
-		LuzPuntual01->setDiffuseColour(1.0,1.0,1.0);
-		LuzPuntual01->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
-		LuzPuntual01->setDirection(Ogre::Vector3( 1, -1, 1 ));
+        Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
+        LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
+        LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
+        LuzPuntual02->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
+        LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
 
-		Ogre::Light* LuzPuntual02 = mSceneMgr->createLight("Luz02");
-		LuzPuntual02->setType(Ogre::Light::LT_DIRECTIONAL);
-		LuzPuntual02->setDiffuseColour(1.0,1.0,1.0);
-		LuzPuntual02->setPosition(Ogre::Vector3(0.0,0.0,-1.0));
-		LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
+        // Luces del tunel
+        
+        Ogre::Light* LucesTunel[10];
+        int posicion = 3050;
+        for (int i = 0; i < 10; ++i) {
+            LucesTunel[i] = mSceneMgr->createLight();
+            LucesTunel[i]->setType(Ogre::Light::LT_POINT);
+            LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
+            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,10.0,posicion));
+            LucesTunel[i]->setCastShadows(false);
+            LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
 
-				
-		// Luces del tunel
-		
-		Ogre::Light* LucesTunel[10];
-		int posicion = 3050;
-		for (int i = 0; i < 10; ++i) {
-			LucesTunel[i] = mSceneMgr->createLight();
-			LucesTunel[i]->setType(Ogre::Light::LT_POINT);
-			LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
-			LucesTunel[i]->setPosition(Ogre::Vector3(0.0,10.0,posicion));
-			LucesTunel[i]->setCastShadows(false);
-			LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
-
-			posicion = posicion + 200;
-		}
-		
+            posicion = posicion + 200;
+        }
+        
         alasMesh();
 
         mSceneMgr->setAmbientLight(Ogre::ColourValue(1.0, 1.0, 1.0));
         mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
-        
-        Ogre::Entity* ent01 = mSceneMgr->createEntity("MyEntity1","ejes01.mesh");
-        Ogre::SceneNode* node01 = mSceneMgr->createSceneNode("Node01");
-        mSceneMgr->getRootSceneNode()->addChild(node01);
-        node01->attachObject(ent01);
-        node01->translate(8,3.517,9.462);
 
         /* ___    __ _   _ __   _ __    ___  
           / __|  / _` | | '__| | '__|  / _ \ 
@@ -246,7 +238,7 @@ public:
 
         //Rueda 01 Delantera Derecha
         Ogre::SceneNode* _nodeRueda01 = mSceneMgr->createSceneNode("Rueda01");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda01);
+        _nodeChasis01->addChild(_nodeRueda01);
             
         Ogre::Entity* _entRueda01 = mSceneMgr->createEntity("entRueda01", "ruedaDetallada.mesh");
         _nodeRueda01->translate(-5.77,3.517,9.462);
@@ -255,7 +247,7 @@ public:
 
         //Rueda 02 Delantera Izquierda
         Ogre::SceneNode* _nodeRueda02 = mSceneMgr->createSceneNode("Rueda02");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda02);
+        _nodeChasis01->addChild(_nodeRueda02);
             
         Ogre::Entity* _entRueda02 = mSceneMgr->createEntity("entRueda02", "ruedaDetallada.mesh");
         _nodeRueda02->translate(8,3.517,9.462);
@@ -264,7 +256,7 @@ public:
 
         //Rueda 03 Trasera Derecha
         Ogre::SceneNode* _nodeRueda03 = mSceneMgr->createSceneNode("Rueda03");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda03);
+        _nodeChasis01->addChild(_nodeRueda03);
             
         Ogre::Entity* _entRueda03 = mSceneMgr->createEntity("entRueda03", "ruedaDetallada.mesh");
         _nodeRueda03->translate(-5.77,3.517,-9.462);
@@ -273,7 +265,7 @@ public:
 
         //Rueda 04 Trasera Izquierda
         Ogre::SceneNode* _nodeRueda04 = mSceneMgr->createSceneNode("Rueda04");
-        mSceneMgr->getRootSceneNode()->addChild(_nodeRueda04);
+        _nodeChasis01->addChild(_nodeRueda04);
             
         Ogre::Entity* _entRueda04 = mSceneMgr->createEntity("entRueda04", "ruedaDetallada.mesh");
         _nodeRueda04->translate(8,3.517,-9.462);
@@ -287,10 +279,12 @@ public:
         Ogre::Entity* entAlaD;
 
         //CARA DERECHA
-        entAlaD = mSceneMgr->createEntity("MeshAlaCara");
+        entAlaD  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAlaD = mSceneMgr->createSceneNode("NodoAlaD");
-        nodoAlaD->attachObject(entAlaD);
         _nodeChasis01->addChild(nodoAlaD);
+        nodoAlaD->attachObject(entAlaD);
+        nodoAlaD->translate(-1.0,6.0,-4.0);
+        nodoAlaD->setScale(2.5,2.0,2.0);
         //borde
         Ogre::Entity* entAlaDB = mSceneMgr->createEntity("MeshAlaBorde");
         Ogre::SceneNode* nodoAlaDB = mSceneMgr->createSceneNode("NodoAlaDB");
@@ -298,12 +292,13 @@ public:
         nodoAlaDB->attachObject(entAlaDB);
 
         //CARA IZQUIERDA
-        entAlaI = mSceneMgr->createEntity("MeshAlaCara");
+        entAlaI  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAlaI = mSceneMgr->createSceneNode("NodoAlaI");
-        nodoAlaI->attachObject(entAlaI);
-        nodoAlaI->yaw(Ogre::Degree( 180 ) );
-        nodoAlaI->translate(0.0,0.0,6);
         _nodeChasis01->addChild(nodoAlaI);
+        nodoAlaI->attachObject(entAlaI);
+        nodoAlaI->translate(1.0,6.0,-4.0);
+        nodoAlaI->yaw(Ogre::Degree( 180 ) );
+        nodoAlaI->setScale(2.5,2.0,2.0);
         //borde
         Ogre::Entity* entAlaIB = mSceneMgr->createEntity("MeshAlaBorde");
         Ogre::SceneNode* nodoAlaIB = mSceneMgr->createSceneNode("NodoAlaIB");
