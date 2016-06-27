@@ -91,6 +91,9 @@ public:
 
         float rotX;
 
+        Ogre::Vector3 posicionCar = _nodoCarro->getPosition();
+        Ogre::Vector3 posicionCam = _cam->getPosition();
+
         if (_key->isKeyDown(OIS::KC_ESCAPE))
             return false;
 
@@ -106,20 +109,23 @@ public:
                 _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
             }
 
-            cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
+            //cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
         }
 
         // Si presionamos la tecla s
         if(_key->isKeyDown(OIS::KC_S)){
-            tcam += Ogre::Vector3(0,0, 15);
-            tcar += Ogre::Vector3(0,0,-15);
+            
+            if(posicionCar.z > -48 ){
+                tcam += Ogre::Vector3(0,0, 15);
+                tcar += Ogre::Vector3(0,0,-15);
+            }
 
             rotRx = (rotRx - 1) % 360;
             for(int i =0; i < 4; i++){
                 _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
             }
 
-            cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
+            //cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
         } 
 
         // Si presionamos la tecla a
@@ -160,52 +166,29 @@ public:
             //}
         }           
         
-        if(_key->isKeyDown(OIS::KC_T)){ 
-            for(int i =0; i <6 ; i++){
-                animationCar[i]->setEnabled(true);
-            }
-            //animationCar[1]->setEnabled(true);
-        }       
-
-        // Camara Control
-        //float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
-        //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
-        
-        //_cam->pitch(Ogre::Radian(rotY));
-
-        Ogre::Vector3 posicionCar = _nodoCarro->getPosition();
-
-        //if(newPosCar.z < -48 ){
-        //    newPosCar.z -= (48 + newPosCar.z);
-        //}
         float difx = 0.0;
-        if(posicionCar.z < 388.9 && posicionCar.x < -123.9){
+        float difz = 0.0;
+
+        if(posicionCar.z < 417.5 && posicionCar.x < -123.9){
             difx = (123.9 + posicionCar.x);
-            tcam.x = 0.0;
-        }else if(posicionCar.z < 388.9 && posicionCar.x > 123.9){
+        }else if(posicionCar.z < 417.5 && posicionCar.x > 123.9){
             difx = (posicionCar.x - 123.9);
-            tcam.x = 0.0;
         }else if(posicionCar.z > 2900 && posicionCar.z < 4913.7 && posicionCar.x > 30.1){ //tunel
             difx = (posicionCar.x - 30.1);
-            tcam.x = 0.0;
         }else if(posicionCar.z > 2900 && posicionCar.z < 4913.7 && posicionCar.x < -25.05){
             difx = (25.05 + posicionCar.x);
-            tcam.x = 0.0;
         }
 
-        Ogre::Vector3 newPosCar = tcar*movSpeed*evt.timeSinceLastFrame;
         Ogre::Vector3 newPosCam = tcam*movSpeed*evt.timeSinceLastFrame;
-
-        Ogre::Vector3 posicionCam = _cam->getPosition();
-
-        //newPosCam.x -= difx;
-        newPosCar.x -= difx;
+        newPosCam.x += difx;
         _cam->moveRelative(newPosCam);
+
+        Ogre::Vector3 newPosCar = tcar*movSpeed*evt.timeSinceLastFrame;
+        newPosCar.x -= difx;
         _nodoCarro->translate(newPosCar);
 
         printf("carro z %f\n", posicionCar.z);
         printf("carro x %f\n", posicionCar.x);
-
         printf("camara z %f\n", posicionCam.z);
         printf("camara x %f\n", posicionCam.x);
 
@@ -222,6 +205,14 @@ public:
         animationObs02 -> addTime(evt.timeSinceLastFrame);
         animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
+
+
+
+        // Camara Control
+        //float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
+        //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
+        
+        //_cam->pitch(Ogre::Radian(rotY));
 
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame);
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
