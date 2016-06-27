@@ -10,13 +10,19 @@ Ogre::AnimationState* animationObs01;
 Ogre::AnimationState* animationObs02;
 Ogre::AnimationState* animationObs03;
 Ogre::AnimationState* animationObs04;
-float duration = 4.0f;
-float duration2 = 4.0f;
+float duration = 10.0f;
+float duration2 = 10.0f;
+
+// animacion carro-nave
+Ogre::AnimationState* animationCar01;
+int rotRz = 0;
 
 //Monedas
 int cantMonedas = 20;
 Ogre::SceneNode* nodoMonedas[20];
 bool atrapada[20];
+
+int puntaje = 0;
 
 class FrameListenerClase : public Ogre::FrameListener { // Hereda de la clase FrameListener de Ogre, escucha algo
 
@@ -26,9 +32,14 @@ private:
     OIS::Keyboard* _key; // Teclado
     OIS::Mouse* _mouse; // Mouse
 
+    Ogre::SceneNode* _nodoCarro; // Creamos nodo
+    Ogre::SceneNode* _nodoRuedas[4];
+
 public:
     // Constructor que le asignamos el nodo que creamos
-    FrameListenerClase(Ogre::Camera* cam, 
+    FrameListenerClase(Ogre::SceneNode* nodoCarro,
+                       Ogre::SceneNode* nodoRuedas[4],
+                       Ogre::Camera* cam, 
                        RenderWindow* win) {
 
         // Configuracion captura teclado y mouse
@@ -41,8 +52,12 @@ public:
         OIS::ParamList pl;
         pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
 
-        // Eventos
+        _nodoCarro = nodoCarro;
+        for(int i =0; i < 4; i++){
+            _nodoRuedas[i] = nodoRuedas[i];
+        }
 
+        // Eventos
         _man = OIS::InputManager::createInputSystem(pl);
         _key = static_cast< OIS::Keyboard*>(_man->createInputObject(OIS::OISKeyboard, false));
         _mouse = static_cast< OIS::Mouse*>(_man->createInputObject(OIS::OISMouse, false));
@@ -63,9 +78,9 @@ public:
 
         float movSpeed = 10.0f;
         Ogre::Vector3 tcam(0,0,0);
-        float a = 0.0;
-        bool abiertas = false;
+        Ogre::Vector3 tcar(0,0,0);
 
+        
         Ogre::Vector3 x;
 
         if (_key->isKeyDown(OIS::KC_ESCAPE))
@@ -75,34 +90,47 @@ public:
             
         // Si presionamos la tecla w
         if(_key->isKeyDown(OIS::KC_W)){     
-            tcam += Ogre::Vector3(0,0,-10);
+            tcam += Ogre::Vector3(0,0,-15);
+            tcar += Ogre::Vector3(0,0, 15);
+            
+            rotRz = (rotRz + 1) % 360;
+            for(int i =0; i < 4; i++){
+                _nodoRuedas[i]->pitch(Ogre::Degree(rotRz));
+            }
         }
 
         // Si presionamos la tecla a
         if(_key->isKeyDown(OIS::KC_A)){ 
-            tcam += Ogre::Vector3(-10,0,0); 
+            tcam += Ogre::Vector3(-15,0,0); 
+            tcar += Ogre::Vector3( 15,0,0);
         }
 
         // Si presionamos la tecla d
         if(_key->isKeyDown(OIS::KC_D)){ 
-            tcam += Ogre::Vector3(10,0,0);
+            tcam += Ogre::Vector3( 15,0,0);
+            tcar += Ogre::Vector3(-15,0,0);
         }
 
+        // Si presionamos la tecla s
+        if(_key->isKeyDown(OIS::KC_S)){
+            tcam += Ogre::Vector3(0,0, 15);
+            tcar += Ogre::Vector3(0,0,-15);
 
-        //if(_key->isKeyDown(OIS::KC_E)){   
-        
-
-        //if(_key->isKeyDown(OIS::KC_R)){       
+            rotRz = (rotRz - 1) % 360;
+            for(int i =0; i < 4; i++){
+                _nodoRuedas[i]->pitch(Ogre::Degree(rotRz));
+            }
+        }            
         
         // Camara Control
-        float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
-        float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
-        _cam->yaw(Ogre::Radian(rotX));
-        _cam->pitch(Ogre::Radian(rotY));
+        //float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
+        //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
+        //_cam->yaw(Ogre::Radian(rotX));
+        //_cam->pitch(Ogre::Radian(rotY));
 
         // Usados en el proyecto 1 de ogre:
         _cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);
-        //_nodoNave->translate(tcam*movSpeed*evt.timeSinceLastFrame);
+        _nodoCarro->translate(tcar*movSpeed*evt.timeSinceLastFrame);
 
         // Animacion Obstaculos
         animationObs01 -> addTime(evt.timeSinceLastFrame);
@@ -120,6 +148,8 @@ class Example1 : public ExampleApplication
 {
 
 public:
+    Ogre::SceneNode* _nodeChasis01;
+    Ogre::SceneNode* nodoRuedas[4];
 
     Ogre::FrameListener* FrameListener01; // Objeto de FrameListener
 
@@ -137,15 +167,15 @@ public:
 
     // Metodo
     void createFrameListener() {
-        FrameListener01 = new FrameListenerClase(mCamera, mWindow); 
+        FrameListener01 = new FrameListenerClase(_nodeChasis01, nodoRuedas, mCamera, mWindow); 
         mRoot->addFrameListener(FrameListener01);
     }
 
     void createCamera() {
 
         mCamera = mSceneMgr->createCamera("MyCamera1");
-        mCamera->setPosition(0,100,-200);
-        mCamera->lookAt(0,0,100);
+        mCamera->setPosition(0,20,-100);
+        mCamera->lookAt(0,20,100);
         mCamera->setNearClipDistance(1);
 
     }
@@ -229,49 +259,51 @@ public:
         */
 
         //Chasis
-        Ogre::SceneNode* _nodeChasis01 = mSceneMgr->createSceneNode("Chasis01");
+        _nodeChasis01 = mSceneMgr->createSceneNode("Chasis01");
         mSceneMgr->getRootSceneNode()->addChild(_nodeChasis01);
+        _nodeChasis01->setScale(1.2,1.2,1.2);
             
         Ogre::Entity* _entChasis01 = mSceneMgr->createEntity("entChasis01", "chasisCarro.mesh");
         _entChasis01->setMaterialName("shCarro01");
         _nodeChasis01->attachObject(_entChasis01);
 
         //Rueda 01 Delantera Derecha
-        Ogre::SceneNode* _nodeRueda01 = mSceneMgr->createSceneNode("Rueda01");
-        _nodeChasis01->addChild(_nodeRueda01);
+        nodoRuedas[0] = mSceneMgr->createSceneNode("Rueda01");
+        _nodeChasis01->addChild(nodoRuedas[0]);
             
         Ogre::Entity* _entRueda01 = mSceneMgr->createEntity("entRueda01", "ruedaDetallada.mesh");
-        _nodeRueda01->translate(-5.77,3.517,9.462);
+        nodoRuedas[0]->translate(-5.77,3.517,9.462);
         _entRueda01->setMaterialName("shRueda02");
-        _nodeRueda01->attachObject(_entRueda01);
+        nodoRuedas[0]->attachObject(_entRueda01);
 
         //Rueda 02 Delantera Izquierda
-        Ogre::SceneNode* _nodeRueda02 = mSceneMgr->createSceneNode("Rueda02");
-        _nodeChasis01->addChild(_nodeRueda02);
+        nodoRuedas[1] = mSceneMgr->createSceneNode("Rueda02");
+        _nodeChasis01->addChild(nodoRuedas[1]);
             
         Ogre::Entity* _entRueda02 = mSceneMgr->createEntity("entRueda02", "ruedaDetallada.mesh");
-        _nodeRueda02->translate(8,3.517,9.462);
+        nodoRuedas[1]->translate(8,3.517,9.462);
         _entRueda02->setMaterialName("shRueda02");
-        _nodeRueda02->attachObject(_entRueda02);
+        nodoRuedas[1]->attachObject(_entRueda02);
 
         //Rueda 03 Trasera Derecha
-        Ogre::SceneNode* _nodeRueda03 = mSceneMgr->createSceneNode("Rueda03");
-        _nodeChasis01->addChild(_nodeRueda03);
+        nodoRuedas[2] = mSceneMgr->createSceneNode("Rueda03");
+        _nodeChasis01->addChild(nodoRuedas[2]);
             
         Ogre::Entity* _entRueda03 = mSceneMgr->createEntity("entRueda03", "ruedaDetallada.mesh");
-        _nodeRueda03->translate(-5.77,3.517,-9.462);
+        nodoRuedas[2]->translate(-5.77,3.517,-9.462);
         _entRueda03->setMaterialName("shRueda02");
-        _nodeRueda03->attachObject(_entRueda03);
+        nodoRuedas[2]->attachObject(_entRueda03);
 
         //Rueda 04 Trasera Izquierda
-        Ogre::SceneNode* _nodeRueda04 = mSceneMgr->createSceneNode("Rueda04");
-        _nodeChasis01->addChild(_nodeRueda04);
+        nodoRuedas[3] = mSceneMgr->createSceneNode("Rueda04");
+        _nodeChasis01->addChild(nodoRuedas[3]);
             
         Ogre::Entity* _entRueda04 = mSceneMgr->createEntity("entRueda04", "ruedaDetallada.mesh");
-        _nodeRueda04->translate(8,3.517,-9.462);
+        nodoRuedas[3]->translate(8,3.517,-9.462);
         _entRueda04->setMaterialName("shRueda02");
-        _nodeRueda04->attachObject(_entRueda04);
+        nodoRuedas[3]->attachObject(_entRueda04);
 
+        /*
         //ALAS
         Ogre::SceneNode* nodoAlaI;
         Ogre::SceneNode* nodoAlaD;
@@ -283,7 +315,7 @@ public:
         nodoAlaD = mSceneMgr->createSceneNode("NodoAlaD");
         _nodeChasis01->addChild(nodoAlaD);
         nodoAlaD->attachObject(entAlaD);
-        nodoAlaD->translate(-1.0,6.0,-4.0);
+        nodoAlaD->translate(-1.0,7.0,-4.0);
         nodoAlaD->setScale(2.5,2.0,2.0);
         //borde
         Ogre::Entity* entAlaDB = mSceneMgr->createEntity("MeshAlaBorde");
@@ -296,7 +328,7 @@ public:
         nodoAlaI = mSceneMgr->createSceneNode("NodoAlaI");
         _nodeChasis01->addChild(nodoAlaI);
         nodoAlaI->attachObject(entAlaI);
-        nodoAlaI->translate(1.0,6.0,-4.0);
+        nodoAlaI->translate(1.0,7.0,-4.0);
         nodoAlaI->yaw(Ogre::Degree( 180 ) );
         nodoAlaI->setScale(2.5,2.0,2.0);
         //borde
@@ -304,6 +336,7 @@ public:
         Ogre::SceneNode* nodoAlaIB = mSceneMgr->createSceneNode("NodoAlaIB");
         nodoAlaI->addChild(nodoAlaIB);
         nodoAlaIB->attachObject(entAlaIB);
+        */
 
         /*    _         _           
       _ __   (_)  ___  | |_    __ _ 
@@ -399,19 +432,20 @@ public:
         key = trackObstaculos01 -> createNodeKeyFrame(0.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(-150,3.517,1700));
-        key = trackObstaculos01 -> createNodeKeyFrame(4.0);
+        key = trackObstaculos01 -> createNodeKeyFrame(1.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(150,3.517,1500));
-        key = trackObstaculos01 -> createNodeKeyFrame(8.0);
+        key -> setTranslate(Vector3(60,3.517,1600));
+        /*
+        key = trackObstaculos01 -> createNodeKeyFrame(2.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(450,3.517,1300));
-        key = trackObstaculos01 -> createNodeKeyFrame(12.0);
+        key -> setTranslate(Vector3(50,3.517,1500));
+        key = trackObstaculos01 -> createNodeKeyFrame(3.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(750,3.517,1100));
-        key = trackObstaculos01 -> createNodeKeyFrame(16.0);
+        key = trackObstaculos01 -> createNodeKeyFrame(4.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
-        key -> setTranslate(Vector3(1050,3.517,900));
-        
+        key -> setTranslate(Vector3(60,3.517,1600));
+        */
         animationObs01 = mSceneMgr -> createAnimationState("animationObstaculos01");
         animationObs01 -> setEnabled(true);
         animationObs01 -> setLoop(true);
@@ -424,10 +458,13 @@ public:
         key2 = trackObstaculos02 -> createNodeKeyFrame(0.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
         key2 -> setTranslate(Vector3(-60,3.517,1800));
-        key2 = trackObstaculos02 -> createNodeKeyFrame(4.0);
+        key2 = trackObstaculos02 -> createNodeKeyFrame(1.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
-        key2 -> setTranslate(Vector3(150,3.517,1700));
-                
+        key2 -> setTranslate(Vector3(-70,3.517,1700));
+        /*key2 = trackObstaculos02 -> createNodeKeyFrame(2.0);
+        key2 ->setScale(Vector3(3.0,3.0,3.0));
+        key2 -> setTranslate(Vector3(50,3.517,1600));
+        */        
         animationObs02 = mSceneMgr -> createAnimationState("animationObstaculos02");
         animationObs02 -> setEnabled(true);
         animationObs02 -> setLoop(true);
@@ -441,13 +478,13 @@ public:
         key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(150,3.517,1700));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
+        key3 = trackObstaculos03 -> createNodeKeyFrame(1.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
-        key3 -> setTranslate(Vector3(-150,3.517,2000));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(10.0);
+        key3 -> setTranslate(Vector3(60,3.517,1850));
+        /*key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(-350,3.517,2000));
-        
+        */
         animationObs03 = mSceneMgr -> createAnimationState("animationObstaculos03");
         animationObs03 -> setEnabled(true);
         animationObs03 -> setLoop(true);
@@ -460,16 +497,30 @@ public:
         Ogre::TransformKeyFrame* key4;
         key4 = trackObstaculos04 -> createNodeKeyFrame(0.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-60,3.517,1800));
-        key4 = trackObstaculos04 -> createNodeKeyFrame(4.0);
+        key4 -> setTranslate(Vector3(60,3.517,1800));
+        key4 = trackObstaculos04 -> createNodeKeyFrame(1.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
-        key4 -> setTranslate(Vector3(-150,3.517,1800));
-            
+        key4 -> setTranslate(Vector3(-60,3.517,1900));
+        
         animationObs04 = mSceneMgr -> createAnimationState("animationObstaculos04");
         animationObs04 -> setEnabled(true);
         animationObs04 -> setLoop(true);
         
         colocarMonedas();
+
+        // Luna / Sol Decoración
+        Ogre::SceneNode* nodoLuna = mSceneMgr->createSceneNode("Luna");
+        mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
+        
+        Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
+        //entLuna->setMaterialName("AndreaCenteno_Estrellas/Estrellita");
+        nodoLuna->attachObject(entLuna);
+        nodoLuna->setScale(0.1,0.1,0.1);
+        nodoLuna->setPosition(0,200,10000);
+        
+        
+        Ogre::ParticleSystem* partSystem = mSceneMgr->createParticleSystem("FuegosArtificiales","Examples/Fireworks");
+        nodoLuna->attachObject(partSystem);
 
     }
     void colocarMonedas(){
@@ -513,17 +564,10 @@ public:
         nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
         nodoMonedas[i]->attachObject(_entMoneda);
     }
-
-    
-
-
-
 };
-
 
 int main (void)
 {
-
     Example1 app;
     app.go();
     return 0;
