@@ -1,23 +1,44 @@
-material cubito
+material Cubito/Cubito
 {
 	technique
 	{
 		pass
 		{
+			ambient 0.1 0.1 0.1
 			
-			ambient 0.616687 0.90461 1 0.7
-         	diffuse 0.616687 0.90461 1 0.7
-         	specular 1 1 1 1 20
-
-         	scene_blend alpha_blend 
-			
-
 			texture_unit
 			{
-				texture cubitos.jpg
+				texture rainbow.jpg
+				scale 0.1 1
 			}
 		}
 
 	}
 
 }
+
+material Cubito/TransparentTest
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.2 0.2 0.2
+			scene_blend add
+			depth_write off
+
+			texture_unit
+			{
+				texture Water01.jpg
+				
+			}
+
+			texture_unit
+			{
+				texture Water01.jpg
+				wave_xform 
+			}
+		}
+	}
+}
+
