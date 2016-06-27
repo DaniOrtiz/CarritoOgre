@@ -15,7 +15,8 @@ float duration2 = 10.0f;
 
 // animacion carro-nave
 Ogre::AnimationState* animationCar01;
-int rotRz = 0;
+int rotRx = 0;
+int rotRy = 0;
 
 //Monedas
 int cantMonedas = 20;
@@ -32,6 +33,8 @@ private:
     OIS::Keyboard* _key; // Teclado
     OIS::Mouse* _mouse; // Mouse
 
+    Ogre::SceneNode *cameraYawNode;
+    
     Ogre::SceneNode* _nodoCarro; // Creamos nodo
     Ogre::SceneNode* _nodoRuedas[4];
 
@@ -80,7 +83,8 @@ public:
         Ogre::Vector3 tcam(0,0,0);
         Ogre::Vector3 tcar(0,0,0);
 
-        
+        float rotX;
+
         Ogre::Vector3 x;
 
         if (_key->isKeyDown(OIS::KC_ESCAPE))
@@ -93,9 +97,9 @@ public:
             tcam += Ogre::Vector3(0,0,-15);
             tcar += Ogre::Vector3(0,0, 15);
             
-            rotRz = (rotRz + 1) % 360;
+            rotRx = (rotRx + 1) % 360;
             for(int i =0; i < 4; i++){
-                _nodoRuedas[i]->pitch(Ogre::Degree(rotRz));
+                _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
             }
         }
 
@@ -103,12 +107,32 @@ public:
         if(_key->isKeyDown(OIS::KC_A)){ 
             tcam += Ogre::Vector3(-15,0,0); 
             tcar += Ogre::Vector3( 15,0,0);
+
+            rotX = evt.timeSinceLastFrame;
+            //_cam->yaw(Ogre::Radian(rotX));
+            _nodoCarro->yaw(Ogre::Radian(rotX));
+            //if(rotRy < 10){
+            //    rotRy = 10;
+            //    for(int i =0; i < 2; i++){
+            //        _nodoRuedas[i]->yaw(Ogre::Degree(rotRy));
+            //    }
+            //}
         }
 
         // Si presionamos la tecla d
         if(_key->isKeyDown(OIS::KC_D)){ 
             tcam += Ogre::Vector3( 15,0,0);
             tcar += Ogre::Vector3(-15,0,0);
+
+            rotX = evt.timeSinceLastFrame * -1;
+            //_cam->yaw(Ogre::Radian(rotX));
+            _nodoCarro->yaw(Ogre::Radian(rotX));
+            //if(rotRy > -10){
+            //    rotRy = -10;
+            //    for(int i =0; i < 2; i++){
+            //        _nodoRuedas[i]->yaw(Ogre::Degree(rotRy));
+            //    }
+            //}
         }
 
         // Si presionamos la tecla s
@@ -116,16 +140,16 @@ public:
             tcam += Ogre::Vector3(0,0, 15);
             tcar += Ogre::Vector3(0,0,-15);
 
-            rotRz = (rotRz - 1) % 360;
+            rotRx = (rotRx - 1) % 360;
             for(int i =0; i < 4; i++){
-                _nodoRuedas[i]->pitch(Ogre::Degree(rotRz));
+                _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
             }
         }            
         
         // Camara Control
         //float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
         //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
-        //_cam->yaw(Ogre::Radian(rotX));
+        
         //_cam->pitch(Ogre::Radian(rotY));
 
         // Usados en el proyecto 1 de ogre:
@@ -137,6 +161,9 @@ public:
         animationObs02 -> addTime(evt.timeSinceLastFrame);
         animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
+
+
+        //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
 
         return true;
 
@@ -270,6 +297,7 @@ public:
         //Rueda 01 Delantera Derecha
         nodoRuedas[0] = mSceneMgr->createSceneNode("Rueda01");
         _nodeChasis01->addChild(nodoRuedas[0]);
+        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[0]);
             
         Ogre::Entity* _entRueda01 = mSceneMgr->createEntity("entRueda01", "ruedaDetallada.mesh");
         nodoRuedas[0]->translate(-5.77,3.517,9.462);
@@ -279,6 +307,7 @@ public:
         //Rueda 02 Delantera Izquierda
         nodoRuedas[1] = mSceneMgr->createSceneNode("Rueda02");
         _nodeChasis01->addChild(nodoRuedas[1]);
+        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[1]);
             
         Ogre::Entity* _entRueda02 = mSceneMgr->createEntity("entRueda02", "ruedaDetallada.mesh");
         nodoRuedas[1]->translate(8,3.517,9.462);
@@ -288,6 +317,7 @@ public:
         //Rueda 03 Trasera Derecha
         nodoRuedas[2] = mSceneMgr->createSceneNode("Rueda03");
         _nodeChasis01->addChild(nodoRuedas[2]);
+        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[2]);
             
         Ogre::Entity* _entRueda03 = mSceneMgr->createEntity("entRueda03", "ruedaDetallada.mesh");
         nodoRuedas[2]->translate(-5.77,3.517,-9.462);
@@ -297,6 +327,7 @@ public:
         //Rueda 04 Trasera Izquierda
         nodoRuedas[3] = mSceneMgr->createSceneNode("Rueda04");
         _nodeChasis01->addChild(nodoRuedas[3]);
+        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[3]);
             
         Ogre::Entity* _entRueda04 = mSceneMgr->createEntity("entRueda04", "ruedaDetallada.mesh");
         nodoRuedas[3]->translate(8,3.517,-9.462);
