@@ -161,6 +161,7 @@ public:
         if(_key->isKeyDown(OIS::KC_T)){ 
             for(int i =0; i <6 ; i++){
                 animationCar[i]->setEnabled(true);
+                animationCar[i]->addTime(evt.timeSinceLastFrame);
             }
             //animationCar[1]->setEnabled(true);
         }       
@@ -183,9 +184,6 @@ public:
         animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
 
-        for(int i =0; i <6 ; i++){
-            animationCar[i] -> addTime(evt.timeSinceLastFrame);
-        }
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
         //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
 
@@ -332,10 +330,8 @@ public:
         Ogre::NodeAnimationTrack* trackCarR00 = animationCarR00->createNodeTrack(0,nodoRuedas[0]);
         Ogre::TransformKeyFrame* keyCarR00;
         keyCarR00 = trackCarR00 -> createNodeKeyFrame(0.0);
-        keyCarR00->setTranslate(Vector3(-5.77,3.517,9.462));
         keyCarR00->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
         keyCarR00 = trackCarR00 -> createNodeKeyFrame(4.0);
-        keyCarR00->setTranslate(Vector3(-5.77,3.517,9.462));
         keyCarR00->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[2] = mSceneMgr -> createAnimationState("animationCarR00");
         animationCar[2]->setEnabled(false);
@@ -355,10 +351,8 @@ public:
         Ogre::NodeAnimationTrack* trackCarR01 = animationCarR01->createNodeTrack(0,nodoRuedas[1]);
         Ogre::TransformKeyFrame* keyCarR01;
         keyCarR01 = trackCarR01 -> createNodeKeyFrame(0.0);
-        keyCarR01->setTranslate(Vector3(8,3.517,9.462));
         keyCarR01->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
         keyCarR01 = trackCarR01 -> createNodeKeyFrame(4.0);
-        keyCarR01->setTranslate(Vector3(8,3.517,9.462));
         keyCarR01->setRotation(Quaternion(Degree(-90), Vector3::UNIT_Z)); 
         animationCar[3] = mSceneMgr -> createAnimationState("animationCarR01");
         animationCar[3]->setEnabled(false);
@@ -378,10 +372,8 @@ public:
         Ogre::NodeAnimationTrack* trackCarR02 = animationCarR02->createNodeTrack(0,nodoRuedas[2]);
         Ogre::TransformKeyFrame* keyCarR02;
         keyCarR02 = trackCarR02 -> createNodeKeyFrame(0.0);
-        keyCarR02->setTranslate(Vector3(-5.77,3.517,-9.462));
         keyCarR02->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
         keyCarR02 = trackCarR02 -> createNodeKeyFrame(4.0);
-        keyCarR02->setTranslate(Vector3(-5.77,3.517,-9.462));
         keyCarR02->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[4] = mSceneMgr -> createAnimationState("animationCarR02");
         animationCar[4]->setEnabled(false);
@@ -400,11 +392,9 @@ public:
         animationCarR03 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarR03 = animationCarR03->createNodeTrack(0,nodoRuedas[3]);
         Ogre::TransformKeyFrame* keyCarR03;
-        keyCarR03 = trackCarR03 -> createNodeKeyFrame(0.0);
-        keyCarR03->setTranslate(Vector3(8,3.517,-9.462));
+        keyCarR03 = trackCarR03 -> createNodeKeyFrame(0.0); 
         keyCarR03->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
         keyCarR03 = trackCarR03 -> createNodeKeyFrame(4.0);
-        keyCarR03->setTranslate(Vector3(8,3.517,-9.462));
         keyCarR03->setRotation(Quaternion(Degree(-90), Vector3::UNIT_Z)); 
         animationCar[5] = mSceneMgr -> createAnimationState("animationCarR03");
         animationCar[5]->setEnabled(false);
@@ -414,7 +404,7 @@ public:
         Ogre::SceneNode* nodoAla[2];
         Ogre::Entity* entAla[2];
 
-        //CARA DERECHA
+        //ALA DERECHA
         entAla[0]  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAla[0] = mSceneMgr->createSceneNode("NodoAlaD");
         _nodeChasis01->addChild(nodoAla[0]);
@@ -431,7 +421,6 @@ public:
         Ogre::NodeAnimationTrack* trackCarrito00 = animationCarrito00->createNodeTrack(0,nodoAla[0]);
         Ogre::TransformKeyFrame* keyCar00;
         keyCar00 = trackCarrito00 -> createNodeKeyFrame(0.0);
-        keyCar00->setScale(Vector3(0.0,0.0,0.0));
         keyCar00->setTranslate(Vector3(-6,7.0,-4.0));
         keyCar00 = trackCarrito00 -> createNodeKeyFrame(4.0);
         keyCar00->setScale(Vector3(2.5,2.0,2.0));
@@ -440,7 +429,7 @@ public:
         animationCar[0]->setEnabled(false);
         animationCar[0]->setLoop(false);
 
-        //CARA IZQUIERDA
+        //ALA IZQUIERDA
         entAla[1]  = mSceneMgr->createEntity("MeshAlaCara");
         nodoAla[1] = mSceneMgr->createSceneNode("NodoAlaI");
         _nodeChasis01->addChild(nodoAla[1]);
@@ -459,7 +448,6 @@ public:
         keyCar01 = trackCarrito01 -> createNodeKeyFrame(0.0);
         keyCar01->setTranslate(Vector3(6,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 
-        keyCar01->setScale(Vector3(0.0,0.0,0.0));
         keyCar01 = trackCarrito01 -> createNodeKeyFrame(4.0);
         keyCar01->setTranslate(Vector3(1.0,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 

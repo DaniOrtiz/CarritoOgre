@@ -15,6 +15,7 @@ float duration2 = 10.0f;
 
 // animacion carro-nave
 Ogre::AnimationState* animationCar[6];
+float durationCar = 4.0f;
 int rotRx = 0;
 int rotRy = 0;
 
@@ -327,7 +328,7 @@ public:
         _entRueda01->setMaterialName("shRueda02");
         nodoRuedas[0]->attachObject(_entRueda01);
         //animacion
-        Ogre::Animation* animationCarR00 = mSceneMgr -> createAnimation("animationCarR00",duration);
+        Ogre::Animation* animationCarR00 = mSceneMgr -> createAnimation("animationCarR00",durationCar);
         animationCarR00 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarR00 = animationCarR00->createNodeTrack(0,nodoRuedas[0]);
         Ogre::TransformKeyFrame* keyCarR00;
@@ -350,7 +351,7 @@ public:
         _entRueda02->setMaterialName("shRueda02");
         nodoRuedas[1]->attachObject(_entRueda02);
         //animacion
-        Ogre::Animation* animationCarR01 = mSceneMgr -> createAnimation("animationCarR01",duration);
+        Ogre::Animation* animationCarR01 = mSceneMgr -> createAnimation("animationCarR01",durationCar);
         animationCarR01 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarR01 = animationCarR01->createNodeTrack(0,nodoRuedas[1]);
         Ogre::TransformKeyFrame* keyCarR01;
@@ -373,7 +374,7 @@ public:
         _entRueda03->setMaterialName("shRueda02");
         nodoRuedas[2]->attachObject(_entRueda03);
         //animacion
-        Ogre::Animation* animationCarR02 = mSceneMgr -> createAnimation("animationCarR02",duration);
+        Ogre::Animation* animationCarR02 = mSceneMgr -> createAnimation("animationCarR02",durationCar);
         animationCarR02 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarR02 = animationCarR02->createNodeTrack(0,nodoRuedas[2]);
         Ogre::TransformKeyFrame* keyCarR02;
@@ -396,7 +397,7 @@ public:
         _entRueda04->setMaterialName("shRueda02");
         nodoRuedas[3]->attachObject(_entRueda04);
         //animacion
-        Ogre::Animation* animationCarR03 = mSceneMgr -> createAnimation("animationCarR03",duration);
+        Ogre::Animation* animationCarR03 = mSceneMgr -> createAnimation("animationCarR03",durationCar);
         animationCarR03 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarR03 = animationCarR03->createNodeTrack(0,nodoRuedas[3]);
         Ogre::TransformKeyFrame* keyCarR03;
@@ -426,7 +427,7 @@ public:
         nodoAla[0]->addChild(nodoAlaDB);
         nodoAlaDB->attachObject(entAlaDB);
         //animacion
-        Ogre::Animation* animationCarrito00 = mSceneMgr -> createAnimation("animationCarrito00",duration);
+        Ogre::Animation* animationCarrito00 = mSceneMgr -> createAnimation("animationCarrito00",durationCar);
         animationCarrito00 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarrito00 = animationCarrito00->createNodeTrack(0,nodoAla[0]);
         Ogre::TransformKeyFrame* keyCar00;
@@ -452,7 +453,7 @@ public:
         nodoAla[1]->addChild(nodoAlaIB);
         nodoAlaIB->attachObject(entAlaIB);
         //animacion
-        Ogre::Animation* animationCarrito01 = mSceneMgr -> createAnimation("animationCarrito01",duration);
+        Ogre::Animation* animationCarrito01 = mSceneMgr -> createAnimation("animationCarrito01",durationCar);
         animationCarrito01 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackCarrito01 = animationCarrito01->createNodeTrack(0,nodoAla[1]);
         Ogre::TransformKeyFrame* keyCar01;
