@@ -15,7 +15,8 @@ float duration2 = 10.0f;
 
 // animacion carro-nave
 Ogre::AnimationState* animationCar[6];
-float durationCar = 4.0f;
+#define durationCar 3.0f
+bool esNave = false;
 int rotRx = 0;
 int rotRy = 0;
 
@@ -90,8 +91,6 @@ public:
 
         float rotX;
 
-        Ogre::Vector3 x;
-
         if (_key->isKeyDown(OIS::KC_ESCAPE))
             return false;
 
@@ -125,12 +124,13 @@ public:
 
         // Si presionamos la tecla a
         if(_key->isKeyDown(OIS::KC_A)){ 
+
             tcam += Ogre::Vector3(-15,0,0); 
             tcar += Ogre::Vector3( 15,0,0);
 
-            rotX = evt.timeSinceLastFrame;
-            _nodoCarro->yaw(Ogre::Radian(rotX));
-            cameraYawNode->yaw(Ogre::Radian(rotX));
+            //rotX = evt.timeSinceLastFrame;
+            //_nodoCarro->yaw(Ogre::Radian(rotX));
+            //cameraYawNode->yaw(Ogre::Radian(rotX));
             //_cam->yaw(Ogre::Radian(rotX));
 
             //if(rotRy < 10){
@@ -143,12 +143,13 @@ public:
 
         // Si presionamos la tecla d
         if(_key->isKeyDown(OIS::KC_D)){ 
+
             tcam += Ogre::Vector3( 15,0,0);
             tcar += Ogre::Vector3(-15,0,0);
 
-            rotX = evt.timeSinceLastFrame * -1;
-            _nodoCarro->yaw(Ogre::Radian(rotX));
-            cameraYawNode->yaw(Ogre::Radian(rotX));
+            //rotX = evt.timeSinceLastFrame * -1;
+            //_nodoCarro->yaw(Ogre::Radian(rotX));
+            //cameraYawNode->yaw(Ogre::Radian(rotX));
             //_cam->yaw(Ogre::Radian(rotX));
 
             //if(rotRy > -10){
@@ -171,12 +172,50 @@ public:
         //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
         
         //_cam->pitch(Ogre::Radian(rotY));
-        
 
-        // Usados en el proyecto 1 de ogre:
-        _cam->moveRelative(tcam*movSpeed*evt.timeSinceLastFrame);
-        _nodoCarro->translate(tcar*movSpeed*evt.timeSinceLastFrame);
-        //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame);
+        Ogre::Vector3 posicionCar = _nodoCarro->getPosition();
+
+        //if(newPosCar.z < -48 ){
+        //    newPosCar.z -= (48 + newPosCar.z);
+        //}
+        float difx = 0.0;
+        if(posicionCar.z < 388.9 && posicionCar.x < -123.9){
+            difx = (123.9 + posicionCar.x);
+            tcam.x = 0.0;
+        }else if(posicionCar.z < 388.9 && posicionCar.x > 123.9){
+            difx = (posicionCar.x - 123.9);
+            tcam.x = 0.0;
+        }else if(posicionCar.z > 2900 && posicionCar.z < 4913.7 && posicionCar.x > 30.1){ //tunel
+            difx = (posicionCar.x - 30.1);
+            tcam.x = 0.0;
+        }else if(posicionCar.z > 2900 && posicionCar.z < 4913.7 && posicionCar.x < -25.05){
+            difx = (25.05 + posicionCar.x);
+            tcam.x = 0.0;
+        }
+
+        Ogre::Vector3 newPosCar = tcar*movSpeed*evt.timeSinceLastFrame;
+        Ogre::Vector3 newPosCam = tcam*movSpeed*evt.timeSinceLastFrame;
+
+        Ogre::Vector3 posicionCam = _cam->getPosition();
+
+        //newPosCam.x -= difx;
+        newPosCar.x -= difx;
+        _cam->moveRelative(newPosCam);
+        _nodoCarro->translate(newPosCar);
+
+        printf("carro z %f\n", posicionCar.z);
+        printf("carro x %f\n", posicionCar.x);
+
+        printf("camara z %f\n", posicionCam.z);
+        printf("camara x %f\n", posicionCam.x);
+
+        if(newPosCar.z > 6530){
+            for(int i =0; i <6 ; i++){
+                if(!esNave) animationCar[i]->setEnabled(true);
+                animationCar[i] -> addTime(evt.timeSinceLastFrame);
+            }
+            esNave = true;
+        }
 
         // Animacion Obstaculos
         animationObs01 -> addTime(evt.timeSinceLastFrame);
@@ -184,9 +223,7 @@ public:
         animationObs03 -> addTime(evt.timeSinceLastFrame);
         animationObs04 -> addTime(evt.timeSinceLastFrame);
 
-        for(int i =0; i <6 ; i++){
-            animationCar[i] -> addTime(evt.timeSinceLastFrame);
-        }
+        //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame);
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
         //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
 
@@ -313,16 +350,21 @@ public:
         //Chasis
         _nodeChasis01 = mSceneMgr->createSceneNode("Chasis01");
         mSceneMgr->getRootSceneNode()->addChild(_nodeChasis01);
-        _nodeChasis01->setScale(1.2,1.2,1.2);
-            
         Ogre::Entity* _entChasis01 = mSceneMgr->createEntity("entChasis01", "chasisCarro.mesh");
         _entChasis01->setMaterialName("shCarro01");
         _nodeChasis01->attachObject(_entChasis01);
 
+
+        //Ogre::Entity* entEsfera= mSceneMgr->createEntity("mySphere", "sphere.mesh");
+        //Ogre::SceneNode* nodeEsfera01 = mSceneMgr->createSceneNode("nodoEsfera01");
+        //nodeEsfera01->attachObject(entEsfera);
+        //_nodeChasis01->addChild(nodeEsfera01);
+        //nodeEsfera01->setScale(0.1,0.1,0.1);
+        //nodeEsfera01->translate(0.0,4.0,0.0);
+
         //Rueda 01 Delantera Derecha
         nodoRuedas[0] = mSceneMgr->createSceneNode("Rueda01");
         _nodeChasis01->addChild(nodoRuedas[0]);
-        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[0]);
         Ogre::Entity* _entRueda01 = mSceneMgr->createEntity("entRueda01", "ruedaDetallada.mesh");
         nodoRuedas[0]->translate(-5.77,3.517,9.462);
         _entRueda01->setMaterialName("shRueda02");
@@ -335,7 +377,7 @@ public:
         keyCarR00 = trackCarR00 -> createNodeKeyFrame(0.0);
         keyCarR00->setTranslate(Vector3(-5.77,3.517,9.462));
         keyCarR00->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
-        keyCarR00 = trackCarR00 -> createNodeKeyFrame(4.0);
+        keyCarR00 = trackCarR00 -> createNodeKeyFrame(durationCar);
         keyCarR00->setTranslate(Vector3(-5.77,3.517,9.462));
         keyCarR00->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[2] = mSceneMgr -> createAnimationState("animationCarR00");
@@ -345,7 +387,6 @@ public:
         //Rueda 02 Delantera Izquierda
         nodoRuedas[1] = mSceneMgr->createSceneNode("Rueda02");
         _nodeChasis01->addChild(nodoRuedas[1]);
-        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[1]);
         Ogre::Entity* _entRueda02 = mSceneMgr->createEntity("entRueda02", "ruedaDetallada.mesh");
         nodoRuedas[1]->translate(8,3.517,9.462);
         _entRueda02->setMaterialName("shRueda02");
@@ -358,9 +399,9 @@ public:
         keyCarR01 = trackCarR01 -> createNodeKeyFrame(0.0);
         keyCarR01->setTranslate(Vector3(8,3.517,9.462));
         keyCarR01->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
-        keyCarR01 = trackCarR01 -> createNodeKeyFrame(4.0);
-        keyCarR01->setTranslate(Vector3(8,3.517,9.462));
-        keyCarR01->setRotation(Quaternion(Degree(-90), Vector3::UNIT_Z)); 
+        keyCarR01 = trackCarR01 -> createNodeKeyFrame(durationCar);
+        keyCarR01->setTranslate(Vector3(7,3.517,9.462));
+        keyCarR01->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[3] = mSceneMgr -> createAnimationState("animationCarR01");
         animationCar[3]->setEnabled(false);
         animationCar[3]->setLoop(false);
@@ -368,7 +409,6 @@ public:
         //Rueda 03 Trasera Derecha
         nodoRuedas[2] = mSceneMgr->createSceneNode("Rueda03");
         _nodeChasis01->addChild(nodoRuedas[2]);
-        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[2]);
         Ogre::Entity* _entRueda03 = mSceneMgr->createEntity("entRueda03", "ruedaDetallada.mesh");
         nodoRuedas[2]->translate(-5.77,3.517,-9.462);
         _entRueda03->setMaterialName("shRueda02");
@@ -381,7 +421,7 @@ public:
         keyCarR02 = trackCarR02 -> createNodeKeyFrame(0.0);
         keyCarR02->setTranslate(Vector3(-5.77,3.517,-9.462));
         keyCarR02->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
-        keyCarR02 = trackCarR02 -> createNodeKeyFrame(4.0);
+        keyCarR02 = trackCarR02 -> createNodeKeyFrame(durationCar);
         keyCarR02->setTranslate(Vector3(-5.77,3.517,-9.462));
         keyCarR02->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[4] = mSceneMgr -> createAnimationState("animationCarR02");
@@ -391,7 +431,6 @@ public:
         //Rueda 04 Trasera Izquierda
         nodoRuedas[3] = mSceneMgr->createSceneNode("Rueda04");
         _nodeChasis01->addChild(nodoRuedas[3]);
-        //mSceneMgr->getRootSceneNode()->addChild(nodoRuedas[3]);
         Ogre::Entity* _entRueda04 = mSceneMgr->createEntity("entRueda04", "ruedaDetallada.mesh");
         nodoRuedas[3]->translate(8,3.517,-9.462);
         _entRueda04->setMaterialName("shRueda02");
@@ -404,9 +443,9 @@ public:
         keyCarR03 = trackCarR03 -> createNodeKeyFrame(0.0);
         keyCarR03->setTranslate(Vector3(8,3.517,-9.462));
         keyCarR03->setRotation(Quaternion(Degree(0), Vector3::UNIT_Z));
-        keyCarR03 = trackCarR03 -> createNodeKeyFrame(4.0);
-        keyCarR03->setTranslate(Vector3(8,3.517,-9.462));
-        keyCarR03->setRotation(Quaternion(Degree(-90), Vector3::UNIT_Z)); 
+        keyCarR03 = trackCarR03 -> createNodeKeyFrame(durationCar);
+        keyCarR03->setTranslate(Vector3(7,3.517,-9.462));
+        keyCarR03->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
         animationCar[5] = mSceneMgr -> createAnimationState("animationCarR03");
         animationCar[5]->setEnabled(false);
         animationCar[5]->setLoop(false);
@@ -432,9 +471,8 @@ public:
         Ogre::NodeAnimationTrack* trackCarrito00 = animationCarrito00->createNodeTrack(0,nodoAla[0]);
         Ogre::TransformKeyFrame* keyCar00;
         keyCar00 = trackCarrito00 -> createNodeKeyFrame(0.0);
-        keyCar00->setScale(Vector3(0.0,0.0,0.0));
         keyCar00->setTranslate(Vector3(-6,7.0,-4.0));
-        keyCar00 = trackCarrito00 -> createNodeKeyFrame(4.0);
+        keyCar00 = trackCarrito00 -> createNodeKeyFrame(durationCar);
         keyCar00->setScale(Vector3(2.5,2.0,2.0));
         keyCar00->setTranslate(Vector3(-1.0,7.0,-4.0));
         animationCar[0] = mSceneMgr -> createAnimationState("animationCarrito00");
@@ -460,8 +498,7 @@ public:
         keyCar01 = trackCarrito01 -> createNodeKeyFrame(0.0);
         keyCar01->setTranslate(Vector3(6,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 
-        keyCar01->setScale(Vector3(0.0,0.0,0.0));
-        keyCar01 = trackCarrito01 -> createNodeKeyFrame(4.0);
+        keyCar01 = trackCarrito01 -> createNodeKeyFrame(durationCar);
         keyCar01->setTranslate(Vector3(1.0,7.0,-4.0));
         keyCar01->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y)); 
         keyCar01->setScale(Vector3(2.5,2.0,2.0));
