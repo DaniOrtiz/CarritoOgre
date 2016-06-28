@@ -3,6 +3,7 @@
 #include "Ogre\Ogre.h"
 #include "OIS\OIS.h"
 #include <time.h>
+#include "TextRenderer.h"
 
 
 // Para la animacion de los obstaculos
@@ -256,6 +257,8 @@ public:
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
         //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
 
+		TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
+
         return true;
     }
 };
@@ -365,6 +368,10 @@ public:
         mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
+
+		// Puntaje
+		new TextRenderer();
+ 		TextRenderer::getSingleton().addTextBox("textoPuntaje", "Monedas:", 10, 10, 50, 20, Ogre::ColourValue::White);
 
         /* ___    __ _   _ __   _ __    ___  
           / __|  / _` | | '__| | '__|  / _ \ 
@@ -647,8 +654,10 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(_nodeBInicial);
                 
         Ogre::Entity* _entBanderaI = mSceneMgr->createEntity("BanderaInicial", "banderaInicial.mesh");              
-        _entBanderaI->setMaterialName("lambert1");              
+        _entBanderaI->setMaterialName("Bandera/Inicio");              
         _nodeBInicial->attachObject(_entBanderaI);
+		_nodeBInicial->yaw(Degree(180));
+		_nodeBInicial->translate(-13,0,125);
 
 
         //BanderaFinal
@@ -656,7 +665,7 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(_nodeBFinal);
         
         Ogre::Entity* _entBanderaF = mSceneMgr->createEntity("BanderaFinal", "banderaFinal.mesh");
-        _entBanderaF->setMaterialName("lambert1");
+        _entBanderaF->setMaterialName("Bandera/Final"); 
         _nodeBFinal->attachObject(_entBanderaF);
         
         //Obstaculos

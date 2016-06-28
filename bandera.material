@@ -1,0 +1,29 @@
+material Bandera/Inicio
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture inicio.jpg
+				scale 0.9 1
+			}
+		}
+	}
+}
+
+material Bandera/Final
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture final2.jpg
+				scale 0.9 1
+			}
+		}
+	}
+}
