@@ -5,20 +5,17 @@
 #include <time.h>
 #include "TextRenderer.cpp"
 
-
 // Para la animacion de los obstaculos
 Ogre::AnimationState* animationObs01;
 Ogre::AnimationState* animationObs02;
 Ogre::AnimationState* animationObs03;
 Ogre::AnimationState* animationObs04;
-float duration = 10.0f;
-float duration2 = 10.0f;
-
-//Ogre::Vector3 posIniCam;
+#define duration 5.0f
 
 // animacion carro-nave
+Ogre::SceneNode* nodoAla[2];
 Ogre::AnimationState* animationCar[6];
-#define durationCar 1.5f
+#define durationCar 1.2f
 bool enEspacio = false;
 int rotRx = 0;
 int rotRy = 0;
@@ -33,7 +30,7 @@ Ogre::Vector3 maxCar;
 Ogre::SceneNode* nodosRocas[16];
 Ogre::AnimationState* animationMeteoros[16];
 #define durationR 8.0f
-#define durationRL 11.0f
+#define durationRL 10.0f
 
 //Monedas
 int cantMonedas = 20;
@@ -142,7 +139,11 @@ public:
             final = true;
         }else if(posicionCar.z > 6515){ //animacion carro
             for(int i =0; i <6 ; i++){
-                if(!enEspacio) animationCar[i]->setEnabled(true);
+                if(!enEspacio){
+                    nodoAla[0]->setVisible(true);
+                    nodoAla[1]->setVisible(true);
+                    animationCar[i]->setEnabled(true);
+                }
                 animationCar[i]->addTime(evt.timeSinceLastFrame);
             }
             enEspacio = true;
@@ -154,6 +155,9 @@ public:
             if(_key->isKeyDown(OIS::KC_SPACE)){ 
                 _nodoCarro->setPosition(0,0,0);
                 _cam->setPosition(0,20,-100);
+
+                nodoAla[0]->setVisible(false);
+                nodoAla[1]->setVisible(false);
 
                 for(int i =0; i <6 ; i++){
                     animationCar[i]->setEnabled(false);
@@ -361,12 +365,10 @@ public:
     }
 
     void createCamera() {
-
         mCamera = mSceneMgr->createCamera("MyCamera1");
         mCamera->setPosition(0,20,-100);
         mCamera->lookAt(0,20,100);
         mCamera->setNearClipDistance(1);
-
     }
 
     void alasMesh(){
@@ -404,8 +406,7 @@ public:
         manualAlaBorde->convertToMesh("MeshAlaBorde");
     }
 
-    void createScene()
-    {
+    void createScene(){
         // Luces Puntuales
         Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
         LuzPuntual01->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -545,7 +546,6 @@ public:
         keyCarR03->setRotation(Quaternion(Degree(90), Vector3::UNIT_Z)); 
 
         //ALAS
-        Ogre::SceneNode* nodoAla[2];
         Ogre::SceneNode* nodoAlaB[2];
         Ogre::Animation* animationCarrito[2];
         Ogre::NodeAnimationTrack* trackCarrito[2];
@@ -555,7 +555,7 @@ public:
             nodoAla[i] = mSceneMgr->createSceneNode("NodoAla"+std::to_string(i+1));
             _nodeChasis01->addChild(nodoAla[i]);
             nodoAla[i]->attachObject(entAla);
-            nodoAla[i]->setScale(0.0,0.0,0.0);
+            nodoAla[i]->setVisible(false);
             //borde
             Ogre::Entity* entAlaB = mSceneMgr->createEntity("MeshAlaBorde");
             nodoAlaB[i] = mSceneMgr->createSceneNode("NodoAlaB"+std::to_string(i+1));
@@ -567,7 +567,7 @@ public:
             trackCarrito[i] = animationCarrito[i]->createNodeTrack(0,nodoAla[i]);
             animationCar[i] = mSceneMgr -> createAnimationState("animationCarrito"+std::to_string(i+1));
             animationCar[i]->setEnabled(false);
-            animationCar[i]->setLoop(false);     
+            animationCar[i]->setLoop(false);  
         }
 
         //KeyFrame ala der
@@ -604,7 +604,7 @@ public:
             break;
             }   
             entRocas->setMaterialName("Rocasycolor/Rocky1"); 
-            nodosRocas[i] ->attachObject(entRocas);   
+            nodosRocas[i] ->attachObject(entRocas);  
         }
 
             nodosRocas[0] ->setPosition(-150,3,8800);
@@ -744,8 +744,8 @@ public:
             
         Ogre::Entity* _entPoster = mSceneMgr->createEntity("PosterInicioFinal", "posterInicioFinal.mesh");
         _nodePoster->attachObject(_entPoster);
+        _entPoster->setMaterialName("Bandera/Poster");
 
-                
         //BanderaInicial
         Ogre::SceneNode* _nodeBInicial = mSceneMgr->createSceneNode("BanderaInicial");
         mSceneMgr->getRootSceneNode()->addChild(_nodeBInicial);
@@ -772,9 +772,10 @@ public:
             mSceneMgr->getRootSceneNode()->addChild(nodosObstaculos[i]);
 
             Ogre::Entity* entObstaculos = mSceneMgr->createEntity("NodoObstaculo"+std::to_string(i+1), "cubo01.mesh");
-
+            entObstaculos->setMaterialName("Rocasycolor/VidriosBloques");
+            
             nodosObstaculos[i] ->attachObject(entObstaculos);
-            nodosObstaculos[i] ->setScale(3.0,3.0,3.0);
+            nodosObstaculos[i] ->setScale(2.6,2.7,2.6);
             
         }
             nodosObstaculos[0] ->setPosition(-150,3.517,600);
@@ -803,9 +804,12 @@ public:
         key = trackObstaculos01 -> createNodeKeyFrame(0.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(-150,3.517,1700));
-        key = trackObstaculos01 -> createNodeKeyFrame(1.0);
+        key = trackObstaculos01 -> createNodeKeyFrame(duration/2);
         key ->setScale(Vector3(3.0,3.0,3.0));
         key -> setTranslate(Vector3(60,3.517,1600));
+        key = trackObstaculos01 -> createNodeKeyFrame(duration);
+        key ->setScale(Vector3(3.0,3.0,3.0));
+        key -> setTranslate(Vector3(-150,3.517,1700));
         /*
         key = trackObstaculos01 -> createNodeKeyFrame(2.0);
         key ->setScale(Vector3(3.0,3.0,3.0));
@@ -829,9 +833,12 @@ public:
         key2 = trackObstaculos02 -> createNodeKeyFrame(0.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
         key2 -> setTranslate(Vector3(-60,3.517,1800));
-        key2 = trackObstaculos02 -> createNodeKeyFrame(1.0);
+        key2 = trackObstaculos02 -> createNodeKeyFrame(duration/2);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
         key2 -> setTranslate(Vector3(-70,3.517,1700));
+        key2 = trackObstaculos02 -> createNodeKeyFrame(duration);
+        key2 ->setScale(Vector3(3.0,3.0,3.0));
+        key2 -> setTranslate(Vector3(-60,3.517,1800));
         /*key2 = trackObstaculos02 -> createNodeKeyFrame(2.0);
         key2 ->setScale(Vector3(3.0,3.0,3.0));
         key2 -> setTranslate(Vector3(50,3.517,1600));
@@ -842,16 +849,19 @@ public:
 
         // Primero a la izquierda
         
-        Ogre::Animation* animationObstaculos03 = mSceneMgr -> createAnimation("animationObstaculos03",duration2);
+        Ogre::Animation* animationObstaculos03 = mSceneMgr -> createAnimation("animationObstaculos03",duration);
         animationObstaculos03 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackObstaculos03 = animationObstaculos03->createNodeTrack(0,nodosObstaculos[7]);
         Ogre::TransformKeyFrame* key3;
         key3 = trackObstaculos03 -> createNodeKeyFrame(0.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(150,3.517,1700));
-        key3 = trackObstaculos03 -> createNodeKeyFrame(1.0);
+        key3 = trackObstaculos03 -> createNodeKeyFrame(duration/2);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(60,3.517,1850));
+        key3 = trackObstaculos03 -> createNodeKeyFrame(duration);
+        key3 ->setScale(Vector3(3.0,3.0,3.0));
+        key3 -> setTranslate(Vector3(150,3.517,1700));
         /*key3 = trackObstaculos03 -> createNodeKeyFrame(4.0);
         key3 ->setScale(Vector3(3.0,3.0,3.0));
         key3 -> setTranslate(Vector3(-350,3.517,2000));
@@ -862,16 +872,19 @@ public:
         
         
         // Segundo a la izquierda
-        Ogre::Animation* animationObstaculos04 = mSceneMgr -> createAnimation("animationObstaculos04",duration2);
+        Ogre::Animation* animationObstaculos04 = mSceneMgr -> createAnimation("animationObstaculos04",duration);
         animationObstaculos04 -> setInterpolationMode(Animation::IM_SPLINE);
         Ogre::NodeAnimationTrack* trackObstaculos04 = animationObstaculos04->createNodeTrack(0,nodosObstaculos[6]);
         Ogre::TransformKeyFrame* key4;
         key4 = trackObstaculos04 -> createNodeKeyFrame(0.0);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
         key4 -> setTranslate(Vector3(60,3.517,1800));
-        key4 = trackObstaculos04 -> createNodeKeyFrame(1.0);
+        key4 = trackObstaculos04 -> createNodeKeyFrame(duration/2);
         key4 ->setScale(Vector3(3.0,3.0,3.0));
         key4 -> setTranslate(Vector3(-60,3.517,1900));
+        key4 = trackObstaculos04 -> createNodeKeyFrame(duration);
+        key4 ->setScale(Vector3(3.0,3.0,3.0));
+        key4 -> setTranslate(Vector3(60,3.517,1800));
         
         animationObs04 = mSceneMgr -> createAnimationState("animationObstaculos04");
         animationObs04 -> setEnabled(true);
@@ -884,12 +897,11 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
         
         Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
-        entLuna->setMaterialName("AndreaCenteno_Estrellas/Estrellita");
+        entLuna->setMaterialName("Rocasycolor/Luna");
         nodoLuna->attachObject(entLuna);
         nodoLuna->setScale(0.1,0.1,0.1);
-        nodoLuna->setPosition(0,200,10000);
-        
-        
+        nodoLuna->setPosition(0,200,10000);       
+
         Ogre::ParticleSystem* partSystem = mSceneMgr->createParticleSystem("FuegosArtificiales","Examples/Fireworks");
         nodoLuna->attachObject(partSystem);
 
@@ -932,7 +944,7 @@ public:
         Ogre::Entity* _entMoneda = mSceneMgr->createEntity("cilindro01.mesh");
         _entMoneda->setMaterialName("AndreaCenteno_Estrellas/Monedas");
         nodoMonedas[i]->setPosition(cx,10.0,cz);
-        nodoMonedas[i]->setScale(3.5f,0.2f,3.5f);
+        nodoMonedas[i]->setScale(3.5f,0.1f,3.5f);
         nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
         nodoMonedas[i]->attachObject(_entMoneda);
     }
