@@ -3,7 +3,7 @@
 #include "Ogre\Ogre.h"
 #include "OIS\OIS.h"
 #include <time.h>
-#include "TextRenderer.h"
+#include "TextRenderer.cpp"
 
 
 // Para la animacion de los obstaculos
@@ -32,6 +32,9 @@ Ogre::SceneNode* nodoMonedas[20];
 bool atrapada[20];
 
 int puntaje = 0;
+Ogre::SceneNode* _nodeChasis01;
+Ogre::SceneNode* nodosObstaculos[12];
+Ogre::SceneNode* nodoColision;
 
 class FrameListenerClase : public Ogre::FrameListener { // Hereda de la clase FrameListener de Ogre, escucha algo
 
@@ -86,6 +89,54 @@ public:
         OIS::InputManager::destroyInputSystem(_man);
     }
 
+	bool interseccion(float distancia, float diametro){
+
+		if (distancia > diametro) 
+			return false;
+		else
+			return true;
+
+
+	}
+
+	void colisionMonedas(){
+
+		Ogre::Vector3 posicionCarro = _nodeChasis01->getPosition();
+
+		/*for ( int i = 0 ; i < 20 ; ++i ){
+
+			if ( !atrapada[i] && (_nodeChasis01->_getWorldAABB().intersects(nodoMonedas[i]->_getWorldAABB())) ){
+				nodoMonedas[i]->setVisible(false);
+				puntaje++;
+				atrapada[i] = true;
+			}
+
+		}
+		if ( !atrapada[0] && (_nodeChasis01->_getWorldAABB().intersects(nodoMonedas[0]->_getWorldAABB())) ){
+				nodoMonedas[0]->setVisible(false);
+				puntaje++;
+				atrapada[0] = true;
+		}*/
+		if (!atrapada[0] && interseccion(posicionCarro.distance(nodoMonedas[0]->getPosition()) , 3.0f+nodoColision->getScale().x)){
+				nodoMonedas[0]->setVisible(false);
+				puntaje++;
+				atrapada[0] = true;
+		}
+	}
+	/*
+	bool colisionObstaculos(){
+
+		Ogre::Vector3 posicionCarro = _nodeChasis01->getPosition();
+
+		for ( int i = 0 ; i < 12 ; ++i ){
+
+			if ( interseccion(posicionCarro.distance(nodosObstaculos[i]->getPosition()) , 3.0f+nodoColision->getScale().x ) ){
+				return true;
+			}
+		}
+
+		return false;
+	}*/
     bool frameStarted(const Ogre::FrameEvent &evt) {
             
         _key->capture();
@@ -257,6 +308,8 @@ public:
         //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
         //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
 
+		//colisionMonedas();
+		
 		TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
 
         return true;
@@ -266,7 +319,7 @@ public:
 class Example1 : public ExampleApplication{
 
 public:
-    Ogre::SceneNode* _nodeChasis01;
+    //Ogre::SceneNode* _nodeChasis01;
     Ogre::SceneNode* nodoRuedas[4];
 
     Ogre::FrameListener* FrameListener01; // Objeto de FrameListener
@@ -610,6 +663,15 @@ public:
         keyRoc02->setRotation(Quaternion(Degree(180), Vector3::UNIT_Y));
         keyRoc02->setTranslate(Vector3(100,-20,6515));
 
+		// Colisiones
+		nodoColision = mSceneMgr->createSceneNode("nodoColision");
+		Ogre::Entity* esferaColision = mSceneMgr->createEntity("esferaColision", "sphere.mesh");
+		nodoColision->setScale(12.0f,12.0f,12.0f);
+		nodoColision->attachObject(esferaColision);
+		nodoColision->setVisible(false);
+			
+		_nodeChasis01->addChild(nodoColision);
+
         /*    _         _           
       _ __   (_)  ___  | |_    __ _ 
      | '_ \  | | / __| | __|  / _` |
@@ -669,7 +731,7 @@ public:
         _nodeBFinal->attachObject(_entBanderaF);
         
         //Obstaculos
-        Ogre::SceneNode* nodosObstaculos[12];
+        //Ogre::SceneNode* nodosObstaculos[12];
         for (int i = 0; i < 12; i++) {
             nodosObstaculos[i] = mSceneMgr->createSceneNode("NodoObstaculo"+std::to_string(i+1));
             mSceneMgr->getRootSceneNode()->addChild(nodosObstaculos[i]);
