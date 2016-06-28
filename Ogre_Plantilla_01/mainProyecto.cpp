@@ -25,7 +25,12 @@ int rotRy = 0;
 
 bool final = false;
 
+//colisiones
+Ogre::Vector3 minCar;
+Ogre::Vector3 maxCar;
+
 //rocas
+Ogre::SceneNode* nodosRocas[16];
 Ogre::AnimationState* animationMeteoros[16];
 #define durationR 8.0f
 #define durationRL 11.0f
@@ -90,6 +95,34 @@ public:
         OIS::InputManager::destroyInputSystem(_man);
     }
 
+    //colision monedas
+    void colisionMonedas(int i, int f, Ogre::Vector3 posicionCar){
+        bool colicion=false;
+        //variable para las colisiones
+        float minPosCx = posicionCar.x + minCar.x;
+        float maxPosCx = posicionCar.x + maxCar.x;
+        float minPosCy = posicionCar.y + minCar.y;
+        float maxPosCy = posicionCar.y + maxCar.y;
+        float minPosCz = posicionCar.z + minCar.z;
+        float maxPosCz = posicionCar.z + maxCar.z;
+
+        for(int j=i; j<f; j++){
+            Ogre::Vector3 posMoneda = nodoMonedas[j]->getPosition();
+
+            if(!atrapada[j] 
+              && maxPosCx >= posMoneda.x && minPosCx <= posMoneda.x
+              && maxPosCy >= posMoneda.y && minPosCy <= posMoneda.y
+              && maxPosCz >= posMoneda.z && minPosCz <= posMoneda.z){
+                printf("colision moneda\n");
+                colicion = true;
+                puntaje += 1;
+                nodoMonedas[j]->setVisible(false);
+                atrapada[j] = true;
+            }
+            if(colicion) break;
+        }
+    }
+
     bool frameStarted(const Ogre::FrameEvent &evt) {
             
         _key->capture();
@@ -124,6 +157,11 @@ public:
 
                 for(int i =0; i <6 ; i++){
                     animationCar[i]->setEnabled(false);
+                }
+                for(int i =0; i <20 ; i++){
+                    nodoMonedas[i]->setVisible(true);
+                    atrapada[i] = false;
+                    puntaje = 0;
                 }
                 enEspacio = false;
                 final = false;
@@ -189,9 +227,44 @@ public:
                 else if(posicionCar.y < -30) dify = posicionCar.y + 30;
                 
                 newPosCar.y -= dify;
-                newPosCam.y -= dify;
+                newPosCam.y -= dify;                
+
+                //variable para las colisiones
+                float minPosCx = posicionCar.x + minCar.x;
+                float maxPosCx = posicionCar.x + maxCar.x;
+                float minPosCy = posicionCar.y + minCar.y;
+                float maxPosCy = posicionCar.y + maxCar.y;
+                float minPosCz = posicionCar.z + minCar.z;
+                float maxPosCz = posicionCar.z + maxCar.z;
+
+                bool colicion =false;
+
+                for(int i=0; i<16; i++){
+                    Ogre::Vector3 posRoca = nodosRocas[i]->getPosition();
+                    
+                    if(maxPosCx >= posRoca.x && minPosCx <= posRoca.x
+                      && maxPosCy >= posRoca.y && minPosCy <= posRoca.y
+                      && maxPosCz >= posRoca.z && minPosCz <= posRoca.z){
+                        printf("colision roca\n");
+                        colicion = true;
+                    }
+                    if(colicion) break;
+                }
             }
            
+            //colisiones
+            if(posicionCar.z < 2351 && posicionCar.z > 50){
+                colisionMonedas(0,5,posicionCar);
+            }else if(posicionCar.z < 4929 && posicionCar.z > 2927){
+                colisionMonedas(5,10,posicionCar);
+            }else if(posicionCar.z < 5505 && posicionCar.z > 4929){
+                colisionMonedas(10,13,posicionCar);
+            }else if(posicionCar.z < 6535 && posicionCar.z > 5505){
+                colisionMonedas(13,15,posicionCar);
+            }else if(posicionCar.z < 10305 && posicionCar.z > 6535){
+                colisionMonedas(15,20,posicionCar);
+            }            
+
             //desplazamiento en x
             float difx = 0.0;
             if(posicionCar.z < 417.5 && posicionCar.x < -122){
@@ -222,7 +295,7 @@ public:
                 difz = 429 - posicionCar.z;
                 newPosCar.z += difz;
                 newPosCam.z -= difz;
-            }else if(posicionCar.z < 6530 && 
+            }else if(posicionCar.z < 6560 && 
                     (posicionCar.y < 0 || posicionCar.y > 10)){
                 difz = 6530 - posicionCar.z;
                 newPosCar.z += difz;
@@ -248,14 +321,14 @@ public:
             _nodoCarro->translate(newPosCar);
         }
 
-        printf("carro z %f\n", posicionCar.z);
-        printf("carro x %f\n", posicionCar.x);
-        printf("carro y %f\n", posicionCar.y);
-        printf("camara y %f\n", posicionCam.y);
-        printf("camara z %f\n", posicionCam.z);
-        printf("camara x %f\n", posicionCam.x);
+        //printf("carro z %f\n", posicionCar.z);
+        //printf("carro x %f\n", posicionCar.x);
+        //printf("carro y %f\n", posicionCar.y);
+        //printf("camara y %f\n", posicionCam.y);
+        //printf("camara z %f\n", posicionCam.z);
+        //printf("camara x %f\n", posicionCam.x);
 
-		TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
+        TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
 
         return true;
     }
@@ -367,9 +440,9 @@ public:
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
 
-		// Puntaje
-		new TextRenderer();
- 		TextRenderer::getSingleton().addTextBox("textoPuntaje", "Monedas:", 10, 10, 50, 20, Ogre::ColourValue::White);
+        // Puntaje
+        new TextRenderer();
+        TextRenderer::getSingleton().addTextBox("textoPuntaje", "Monedas:", 10, 10, 50, 20, Ogre::ColourValue::White);
 
         /* ___    __ _   _ __   _ __    ___  
           / __|  / _` | | '__| | '__|  / _ \ 
@@ -385,11 +458,38 @@ public:
         _nodeChasis01->attachObject(_entChasis01);
 
         //Ogre::Entity* entEsfera= mSceneMgr->createEntity("mySphere", "sphere.mesh");
+        //entEsfera->setMaterialName("Cubito/TransparentTest");
         //Ogre::SceneNode* nodeEsfera01 = mSceneMgr->createSceneNode("nodoEsfera01");
         //nodeEsfera01->attachObject(entEsfera);
         //_nodeChasis01->addChild(nodeEsfera01);
-        //nodeEsfera01->setScale(0.1,0.1,0.1);
+        //nodeEsfera01->setScale(0.12,0.1,0.16);
+        //nodeEsfera01->setScale(0.16,0.13,0.2);
         //nodeEsfera01->translate(0.0,4.0,0.0);
+        //entEsfera->setCastShadows(false);
+
+        //Ogre::AxisAlignedBox box = _nodeChasis01->_getWorldAABB();
+        //Ogre::Vector3 boxsize = box.getSize();
+        //printf ("boxsize is (%f, %f, %f)\n", boxsize.x, boxsize.y, boxsize.z);
+
+        //Ogre::AxisAlignedBox esferaAABB = entEsfera->getBoundingBox();
+        //Ogre::Vector3 min = esferaAABB.getMinimum();
+        //Ogre::Vector3 max = esferaAABB.getMaximum();
+        //Ogre::Vector3 center = esferaAABB.getCenter();
+        //Ogre::Vector3 tam = esferaAABB.getSize();
+        //printf ("max (%f, %f, %f)\n", max.x, max.y, max.z);
+        //printf ("min (%f, %f, %f)\n", min.x, min.y, min.z);
+        //printf ("center (%f, %f, %f)\n", center.x, center.y, center.z);
+        //printf ("esfera (%f, %f, %f)\n", tam.x, tam.y, tam.z);
+
+        Ogre::AxisAlignedBox charAABBCar = _entChasis01->getBoundingBox();//getCarorldBoundingBox();
+        minCar = charAABBCar.getMinimum();
+        maxCar = charAABBCar.getMaximum();
+        Ogre::Vector3 centerCar = charAABBCar.getCenter();
+        Ogre::Vector3 sizeCar( fabs( maxCar.x - minCar.x), fabs( maxCar.y - minCar.y), fabs( maxCar.z - minCar.z ) );
+        printf ("max (%f, %f, %f)\n", maxCar.x, maxCar.y, maxCar.z);
+        printf ("min (%f, %f, %f)\n", minCar.x, minCar.y, minCar.z);
+        printf ("center (%f, %f, %f)\n", centerCar.x, centerCar.y, centerCar.z);
+        printf ("carro is (%f, %f, %f)\n", sizeCar.x, sizeCar.y, sizeCar.z);
 
         Ogre::Animation* animationCarR[4]; 
         Ogre::NodeAnimationTrack* trackCarR[4];
@@ -488,7 +588,6 @@ public:
         keyCar01->setScale(Vector3(2.5,2.0,2.0));     
 
         //Rocas
-        Ogre::SceneNode* nodosRocas[16];
         for (int i = 0; i < 16; i++) {
             nodosRocas[i] = mSceneMgr->createSceneNode("NodoRoca"+std::to_string(i+1));
             mSceneMgr->getRootSceneNode()->addChild(nodosRocas[i]);
@@ -654,8 +753,8 @@ public:
         Ogre::Entity* _entBanderaI = mSceneMgr->createEntity("BanderaInicial", "banderaInicial.mesh");              
         _entBanderaI->setMaterialName("Bandera/Inicio");              
         _nodeBInicial->attachObject(_entBanderaI);
-		_nodeBInicial->yaw(Degree(180));
-		_nodeBInicial->translate(-13,0,125);
+        _nodeBInicial->yaw(Degree(180));
+        _nodeBInicial->translate(-13,0,125);
 
 
         //BanderaFinal
@@ -800,16 +899,17 @@ public:
         for( int i = 0 ; i < 5 ; ++i ){
             crearMonedas(i,200,50,2351);
         }
-
         // Tunel
         for( int i = 5 ; i < 10 ; ++i ){
             crearMonedas(i,32,2927,4929);
         }
         // Tramo 2
-        for( int i = 10 ; i < 15 ; ++i ){
-            crearMonedas(i,200,5505,2351);
+        for( int i = 10 ; i < 13 ; ++i ){
+            crearMonedas(i,123,4929,5505);
         }
-                
+        for( int i = 13 ; i < 15 ; ++i ){
+            crearMonedas(i,80,5505,6535);
+        }                
         // Vacio
         for( int i = 15 ; i < 20 ; ++i ){
             crearMonedas(i,200,6535,10305);
@@ -825,14 +925,14 @@ public:
 
         float cz = (rand() % (maxZ-minZ)) + minZ;
 
-        Ogre::SceneNode* nodoMonedas[20];
+        nodoMonedas[20];
         nodoMonedas[i] = mSceneMgr->createSceneNode("Moneda"+std::to_string(i));
         mSceneMgr->getRootSceneNode()->addChild(nodoMonedas[i]);
         
         Ogre::Entity* _entMoneda = mSceneMgr->createEntity("cilindro01.mesh");
         _entMoneda->setMaterialName("AndreaCenteno_Estrellas/Monedas");
         nodoMonedas[i]->setPosition(cx,10.0,cz);
-        nodoMonedas[i]->setScale(3.5f,0.5f,3.5f);
+        nodoMonedas[i]->setScale(3.5f,0.2f,3.5f);
         nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
         nodoMonedas[i]->attachObject(_entMoneda);
     }
