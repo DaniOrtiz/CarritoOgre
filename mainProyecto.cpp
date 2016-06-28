@@ -458,30 +458,6 @@ public:
         _entChasis01->setMaterialName("shCarro01");
         _nodeChasis01->attachObject(_entChasis01);
 
-        //Ogre::Entity* entEsfera= mSceneMgr->createEntity("mySphere", "sphere.mesh");
-        //entEsfera->setMaterialName("Cubito/TransparentTest");
-        //Ogre::SceneNode* nodeEsfera01 = mSceneMgr->createSceneNode("nodoEsfera01");
-        //nodeEsfera01->attachObject(entEsfera);
-        //_nodeChasis01->addChild(nodeEsfera01);
-        //nodeEsfera01->setScale(0.12,0.1,0.16);
-        //nodeEsfera01->setScale(0.16,0.13,0.2);
-        //nodeEsfera01->translate(0.0,4.0,0.0);
-        //entEsfera->setCastShadows(false);
-
-        //Ogre::AxisAlignedBox box = _nodeChasis01->_getWorldAABB();
-        //Ogre::Vector3 boxsize = box.getSize();
-        //printf ("boxsize is (%f, %f, %f)\n", boxsize.x, boxsize.y, boxsize.z);
-
-        //Ogre::AxisAlignedBox esferaAABB = entEsfera->getBoundingBox();
-        //Ogre::Vector3 min = esferaAABB.getMinimum();
-        //Ogre::Vector3 max = esferaAABB.getMaximum();
-        //Ogre::Vector3 center = esferaAABB.getCenter();
-        //Ogre::Vector3 tam = esferaAABB.getSize();
-        //printf ("max (%f, %f, %f)\n", max.x, max.y, max.z);
-        //printf ("min (%f, %f, %f)\n", min.x, min.y, min.z);
-        //printf ("center (%f, %f, %f)\n", center.x, center.y, center.z);
-        //printf ("esfera (%f, %f, %f)\n", tam.x, tam.y, tam.z);
-
         Ogre::AxisAlignedBox charAABBCar = _entChasis01->getBoundingBox();//getCarorldBoundingBox();
         minCar = charAABBCar.getMinimum();
         maxCar = charAABBCar.getMaximum();
@@ -931,9 +907,7 @@ public:
                 
         float cx = rand() % maxX;
 
-        if ( (rand() % 2) == 1 ){
-            cx = -1;
-        }
+        if ( (rand() % 2) == 1 ) cx = -1;
 
         float cz = (rand() % (maxZ-minZ)) + minZ;
 
@@ -942,7 +916,7 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(nodoMonedas[i]);
         
         Ogre::Entity* _entMoneda = mSceneMgr->createEntity("cilindro01.mesh");
-        _entMoneda->setMaterialName("AndreaCenteno_Estrellas/Monedas");
+        _entMoneda->setMaterialName("AndreaCenteno_Estrellas/Moneda");
         nodoMonedas[i]->setPosition(cx,10.0,cz);
         nodoMonedas[i]->setScale(3.5f,0.1f,3.5f);
         nodoMonedas[i]->rotate(Ogre::Vector3(1.0,0.0,0.0), Ogre::Radian(Ogre::Degree(90.0)));
