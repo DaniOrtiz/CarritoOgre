@@ -3,6 +3,7 @@
 #include "Ogre\Ogre.h"
 #include "OIS\OIS.h"
 #include <time.h>
+#include "TextRenderer.cpp"
 
 
 // Para la animacion de los obstaculos
@@ -13,12 +14,16 @@ Ogre::AnimationState* animationObs04;
 float duration = 10.0f;
 float duration2 = 10.0f;
 
+//Ogre::Vector3 posIniCam;
+
 // animacion carro-nave
 Ogre::AnimationState* animationCar[6];
 #define durationCar 1.5f
 bool enEspacio = false;
 int rotRx = 0;
 int rotRy = 0;
+
+bool final = false;
 
 //rocas
 Ogre::AnimationState* animationMeteoros[16];
@@ -90,130 +95,158 @@ public:
         _key->capture();
         _mouse->capture();
 
+        Ogre::Vector3 posicionCar = _nodoCarro->getPosition();
+        Ogre::Vector3 posicionCam = _cam->getPosition();
+                
         float movSpeed = 16.0f;
         Ogre::Vector3 tcam(0,0,0);
         Ogre::Vector3 tcar(0,0,0);
 
         float rotX;
+        float rotY;
 
-        Ogre::Vector3 posicionCar = _nodoCarro->getPosition();
-        Ogre::Vector3 posicionCam = _cam->getPosition();
-
-        if (_key->isKeyDown(OIS::KC_ESCAPE))
-            return false;
-            
-        // Si presionamos la tecla w
-        if(_key->isKeyDown(OIS::KC_W)){     
-            tcam += Ogre::Vector3(0,0,-10);
-            tcar += Ogre::Vector3(0,0, 10);
-            
-            rotRx = (rotRx + 1) % 360;
-            for(int i =0; i < 4; i++){
-                _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
+        if(posicionCar.z > 10330){
+            final = true;
+        }else if(posicionCar.z > 6515){ //animacion carro
+            for(int i =0; i <6 ; i++){
+                if(!enEspacio) animationCar[i]->setEnabled(true);
+                animationCar[i]->addTime(evt.timeSinceLastFrame);
             }
-
-            //cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
+            enEspacio = true;
         }
-        // Si presionamos la tecla s
-        if(_key->isKeyDown(OIS::KC_S)){
+
+        if (_key->isKeyDown(OIS::KC_ESCAPE)) return false;
         
-            if(posicionCar.z > -48 ){
-                tcam += Ogre::Vector3(0,0, 10);
-                tcar += Ogre::Vector3(0,0,-10);
+        if(final){
+            if(_key->isKeyDown(OIS::KC_SPACE)){ 
+                _nodoCarro->setPosition(0,0,0);
+                _cam->setPosition(0,20,-100);
+
+                for(int i =0; i <6 ; i++){
+                    animationCar[i]->setEnabled(false);
+                }
+                enEspacio = false;
+                final = false;
+            }
+        }else{
+            // Si presionamos la tecla w
+            if(_key->isKeyDown(OIS::KC_W)){     
+                tcam += Ogre::Vector3(0,0,-10);
+                tcar += Ogre::Vector3(0,0, 10);
+                
+                rotRx = (rotRx + 1) % 360;
+                for(int i =0; i < 4; i++){
+                    _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
+                }
+            }
+            // Si presionamos la tecla s
+            if(_key->isKeyDown(OIS::KC_S)){
+            
+                if(posicionCar.z > -48 ){
+                    tcam += Ogre::Vector3(0,0, 10);
+                    tcar += Ogre::Vector3(0,0,-10);
+                }
+
+                rotRx = (rotRx - 1) % 360;
+                for(int i =0; i < 4; i++){
+                    _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
+                }
+            }   
+            //para acelerar
+            if(_key->isKeyDown(OIS::KC_T)){ 
+                tcam += Ogre::Vector3(0,0,-100);
+                tcar += Ogre::Vector3(0,0,100);
+            }  
+
+            // Si presionamos la tecla a
+            if(_key->isKeyDown(OIS::KC_A)){ 
+                tcam += Ogre::Vector3(-10,0,0); 
+                tcar += Ogre::Vector3( 10,0,0);
+            }
+            // Si presionamos la tecla d
+            if(_key->isKeyDown(OIS::KC_D)){ 
+                tcam += Ogre::Vector3( 10,0,0);
+                tcar += Ogre::Vector3(-10,0,0);
+            }           
+            //flecha arriba
+            if(posicionCar.z > 6530 && _key->isKeyDown(OIS::KC_UP)){
+                tcar += Ogre::Vector3(0, 10,0);
+                tcam += Ogre::Vector3(0, 10,0);     
+            }         
+            //flecha abajo
+            if(posicionCar.z > 6530 && _key->isKeyDown(OIS::KC_DOWN)){
+                tcar += Ogre::Vector3(0,-10,0);
+                tcam += Ogre::Vector3(0,-10,0);          
             }
 
-            rotRx = (rotRx - 1) % 360;
-            for(int i =0; i < 4; i++){
-                _nodoRuedas[i]->pitch(Ogre::Degree(rotRx));
+            Ogre::Vector3 newPosCar = tcar*movSpeed*evt.timeSinceLastFrame;
+            Ogre::Vector3 newPosCam = tcam*movSpeed*evt.timeSinceLastFrame;
+
+            //desplazamiento en y
+            float dify = 0.0;
+            if(posicionCar.z > 6530){
+                if(posicionCar.y > 100) dify = posicionCar.y - 100;
+                else if(posicionCar.y < -30) dify = posicionCar.y + 30;
+                
+                newPosCar.y -= dify;
+                newPosCam.y -= dify;
+            }
+           
+            //desplazamiento en x
+            float difx = 0.0;
+            if(posicionCar.z < 417.5 && posicionCar.x < -122){
+                difx = 122 + posicionCar.x;
+            }else if(posicionCar.z < 417.5 && posicionCar.x > 122){
+                difx = posicionCar.x - 122; 
+            }else if(posicionCar.z < 2222 && posicionCar.x > 201.9){
+                difx = posicionCar.x - 201.9;
+            }else if(posicionCar.z < 2222 && posicionCar.x < -201.9){
+                difx = 201.9 + posicionCar.x;
+            }else if(posicionCar.z < 2900){
+            }else if(posicionCar.z < 4941.7 && posicionCar.x > 30.1){ //tunel
+                difx = posicionCar.x - 30.1;
+            }else if(posicionCar.z < 4941.7 && posicionCar.x < -25.05){
+                difx = 25.05 + posicionCar.x;
+            }else if(posicionCar.z < 10339 && posicionCar.x > 203){
+                difx = posicionCar.x - 203;
+            }else if(posicionCar.z < 10339 && posicionCar.x < -203){
+                difx = 203 + posicionCar.x;
+            }
+            newPosCam.x += difx;
+            newPosCar.x -= difx;
+
+            //desplazamiento en z
+            float difz = 0.0;
+            if(posicionCar.z <= 429 && posicionCar.z >= 417.5
+               && (posicionCar.x > 126 || posicionCar.x < -126)){
+                difz = 429 - posicionCar.z;
+                newPosCar.z += difz;
+                newPosCam.z -= difz;
+            }else if(posicionCar.z < 6530 && 
+                    (posicionCar.y < 0 || posicionCar.y > 10)){
+                difz = 6530 - posicionCar.z;
+                newPosCar.z += difz;
+                newPosCam.z -= difz;
+            }else if(posicionCar.z > 10339){
+                difz = posicionCar.z - 10339;
+                newPosCar.z -= difz;
+                newPosCam.z += difz;
             }
 
-            //cameraYawNode->setOrientation(Ogre::Quaternion::IDENTITY);
-        } 
-        // Si presionamos la tecla a
-        if(_key->isKeyDown(OIS::KC_A)){ 
-            tcam += Ogre::Vector3(-10,0,0); 
-            tcar += Ogre::Vector3( 10,0,0);
+            // Animacion Obstaculos
+            animationObs01 -> addTime(evt.timeSinceLastFrame);
+            animationObs02 -> addTime(evt.timeSinceLastFrame);
+            animationObs03 -> addTime(evt.timeSinceLastFrame);
+            animationObs04 -> addTime(evt.timeSinceLastFrame);
 
-            //rotX = evt.timeSinceLastFrame;
-            //_nodoCarro->yaw(Ogre::Radian(rotX));
-            //cameraYawNode->yaw(Ogre::Radian(rotX));
-            //_cam->yaw(Ogre::Radian(rotX));
+            //Animacion rocas
+            for(int i=0; i<16 ; i++){
+                animationMeteoros[i]->addTime(evt.timeSinceLastFrame);
+            }
 
-            //if(rotRy < 10){
-            //    rotRy = 10;
-            //    for(int i =0; i < 2; i++){
-            //        _nodoRuedas[i]->yaw(Ogre::Degree(rotRy));
-            //    }
-            //}
+            _cam->moveRelative(newPosCam);
+            _nodoCarro->translate(newPosCar);
         }
-        // Si presionamos la tecla d
-        if(_key->isKeyDown(OIS::KC_D)){ 
-            tcam += Ogre::Vector3( 10,0,0);
-            tcar += Ogre::Vector3(-10,0,0);
-
-            //rotX = evt.timeSinceLastFrame * -1;
-            //_nodoCarro->yaw(Ogre::Radian(rotX));
-            //cameraYawNode->yaw(Ogre::Radian(rotX));
-            //_cam->yaw(Ogre::Radian(rotX));
-
-            //if(rotRy > -10){
-            //    rotRy = -10;
-            //    for(int i =0; i < 2; i++){
-            //        _nodoRuedas[i]->yaw(Ogre::Degree(rotRy));
-            //    }
-            //}
-        }     
-        //flecha arriba
-        if(posicionCar.z > 6530 && _key->isKeyDown(OIS::KC_UP)){
-            tcar += Ogre::Vector3(0, 10,0);
-            tcam += Ogre::Vector3(0, 10,0);
-        }         
-        //flecha abajo
-        if(posicionCar.z > 6530 && _key->isKeyDown(OIS::KC_DOWN)){
-            tcar += Ogre::Vector3(0,-10,0);
-            tcam += Ogre::Vector3(0,-10,0);
-        }
-
-        if(_key->isKeyDown(OIS::KC_T)){ 
-            tcam += Ogre::Vector3(0,0,-100);
-            tcar += Ogre::Vector3(0,0,100);
-        }  
-
-        Ogre::Vector3 newPosCar = tcar*movSpeed*evt.timeSinceLastFrame;
-        Ogre::Vector3 newPosCam = tcam*movSpeed*evt.timeSinceLastFrame;
-
-        float difz = 0.0;
-        if(posicionCar.z <= 429 && posicionCar.z >= 417.5
-           && (posicionCar.x > 126 || posicionCar.x < -126)){
-            difz = 429 - posicionCar.z;
-            newPosCar.z += difz;
-            newPosCam.z -= difz;
-        }
-
-        float difx = 0.0;
-        if(posicionCar.z < 417.5 && posicionCar.x < -122){
-            difx = 122 + posicionCar.x;
-        }else if(posicionCar.z < 417.5 && posicionCar.x > 122){
-            difx = posicionCar.x - 122; 
-        }else if(posicionCar.z < 2222 && posicionCar.x > 201.9){
-            difx = posicionCar.x - 201.9;
-        }else if(posicionCar.z < 2222 && posicionCar.x < -201.9){
-            difx = 201.9 + posicionCar.x;
-        }else if(posicionCar.z < 2900){
-        }else if(posicionCar.z < 4941.7 && posicionCar.x > 30.1){ //tunel
-            difx = posicionCar.x - 30.1;
-        }else if(posicionCar.z < 4941.7 && posicionCar.x < -25.05){
-            difx = 25.05 + posicionCar.x;
-        }else if(posicionCar.z < 6530 && posicionCar.x > 203){ //tunel
-            difx = posicionCar.x - 203;
-        }else if(posicionCar.z < 6530 && posicionCar.x < -203){
-            difx = 203 + posicionCar.x;
-        }
-
-        //if(posicionCar.z < 6530 && posicionCar.y < 0){
-        //    newPosCar.y -= posicionCar.y;
-        //    newPosCam.y -= posicionCar.y;
-        //}
 
         printf("carro z %f\n", posicionCar.z);
         printf("carro x %f\n", posicionCar.x);
@@ -222,39 +255,7 @@ public:
         printf("camara z %f\n", posicionCam.z);
         printf("camara x %f\n", posicionCam.x);
 
-        if(posicionCar.z > 6515){
-            for(int i =0; i <6 ; i++){
-                if(!enEspacio) animationCar[i]->setEnabled(true);
-                animationCar[i]->addTime(evt.timeSinceLastFrame);
-            }
-        }
-
-        newPosCam.x += difx;
-        _cam->moveRelative(newPosCam);
-
-        newPosCar.x -= difx;
-        _nodoCarro->translate(newPosCar);
-
-        // Animacion Obstaculos
-        animationObs01 -> addTime(evt.timeSinceLastFrame);
-        animationObs02 -> addTime(evt.timeSinceLastFrame);
-        animationObs03 -> addTime(evt.timeSinceLastFrame);
-        animationObs04 -> addTime(evt.timeSinceLastFrame);
-
-        //Animacion rocas
-        for(int i=0; i<16 ; i++){
-            animationMeteoros[i]->addTime(evt.timeSinceLastFrame);
-        }
-
-        // Camara Control
-        //float rotX = _mouse->getMouseState().X.rel * evt.timeSinceLastFrame * -1;
-        //float rotY = _mouse->getMouseState().Y.rel * evt.timeSinceLastFrame * -1;
-        //_cam->pitch(Ogre::Radian(rotY));
-        //_cam->yaw(Ogre::Radian(rotX));
-
-        //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame);
-        //_nodoCarro->translate(cameraYawNode->getOrientation() * tcar*movSpeed*evt.timeSinceLastFrame,Ogre::SceneNode::TS_LOCAL);
-        //_nodoCarro->translate(this->cameraYawNode->getOrientation(), Ogre::SceneNode::TS_LOCAL);
+		TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
 
         return true;
     }
@@ -289,8 +290,8 @@ public:
     void createCamera() {
 
         mCamera = mSceneMgr->createCamera("MyCamera1");
-        mCamera->setPosition(0,20,-80);
-        mCamera->lookAt(0,20,80);
+        mCamera->setPosition(0,20,-100);
+        mCamera->lookAt(0,20,100);
         mCamera->setNearClipDistance(1);
 
     }
@@ -365,6 +366,10 @@ public:
         mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
         // Cielo estrellado
         mSceneMgr->setSkyBox(true, "AndreaCenteno_Estrellas/SkyBox");
+
+		// Puntaje
+		new TextRenderer();
+ 		TextRenderer::getSingleton().addTextBox("textoPuntaje", "Monedas:", 10, 10, 50, 20, Ogre::ColourValue::White);
 
         /* ___    __ _   _ __   _ __    ___  
           / __|  / _` | | '__| | '__|  / _ \ 
@@ -647,8 +652,10 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(_nodeBInicial);
                 
         Ogre::Entity* _entBanderaI = mSceneMgr->createEntity("BanderaInicial", "banderaInicial.mesh");              
-        _entBanderaI->setMaterialName("lambert1");              
+        _entBanderaI->setMaterialName("Bandera/Inicio");              
         _nodeBInicial->attachObject(_entBanderaI);
+		_nodeBInicial->yaw(Degree(180));
+		_nodeBInicial->translate(-13,0,125);
 
 
         //BanderaFinal
@@ -656,7 +663,7 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(_nodeBFinal);
         
         Ogre::Entity* _entBanderaF = mSceneMgr->createEntity("BanderaFinal", "banderaFinal.mesh");
-        _entBanderaF->setMaterialName("lambert1");
+        _entBanderaF->setMaterialName("Bandera/Final"); 
         _nodeBFinal->attachObject(_entBanderaF);
         
         //Obstaculos
@@ -773,7 +780,7 @@ public:
         
         colocarMonedas();
 
-        // Luna / Sol DecoraciÃ³n
+        // Luna / Sol Decoración
         Ogre::SceneNode* nodoLuna = mSceneMgr->createSceneNode("Luna");
         mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
         
