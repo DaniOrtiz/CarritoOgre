@@ -1,0 +1,18 @@
+material circuloneon
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 0 0 1
+			
+
+			texture_unit
+			{
+				texture circuloneon2.png
+			}
+		}
+
+	}
+
+}
