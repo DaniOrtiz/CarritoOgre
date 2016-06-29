@@ -445,15 +445,16 @@ public:
         LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
 
         // Luces del tunel
-        Ogre::Light* LucesTunel[10];
+        Ogre::Light* LucesTunel[6];
         int posicion = 3050;
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 6; ++i) {
             LucesTunel[i] = mSceneMgr->createLight();
             LucesTunel[i]->setType(Ogre::Light::LT_POINT);
-            LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
-            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,3.5,posicion));
+            LucesTunel[i]->setDiffuseColour(4.0,4.0,4.0);
+			LucesTunel[i]->setSpecularColour(1.0,1.0,1.0);
+            LucesTunel[i]->setPosition(Ogre::Vector3(0,35,posicion));
             LucesTunel[i]->setCastShadows(false);
-            LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
+            LucesTunel[i]->setAttenuation(3250, 1.0, 0.0014, 0.000007);
 
             posicion = posicion + 200;
         }
@@ -899,7 +900,7 @@ public:
         Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
         entLuna->setMaterialName("Rocasycolor/Luna");
         nodoLuna->attachObject(entLuna);
-        nodoLuna->setScale(0.1,0.1,0.1);
+        nodoLuna->setScale(0.3,0.3,0.3);
         nodoLuna->setPosition(0,200,10000);       
 
         Ogre::ParticleSystem* partSystem = mSceneMgr->createParticleSystem("FuegosArtificiales","Examples/Fireworks");
