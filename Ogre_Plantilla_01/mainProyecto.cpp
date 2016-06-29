@@ -110,7 +110,6 @@ public:
               && maxPosCx >= posMoneda.x && minPosCx <= posMoneda.x
               && maxPosCy >= posMoneda.y && minPosCy <= posMoneda.y
               && maxPosCz >= posMoneda.z && minPosCz <= posMoneda.z){
-                printf("colision moneda\n");
                 colicion = true;
                 puntaje += 1;
                 nodoMonedas[j]->setVisible(false);
@@ -118,6 +117,28 @@ public:
             }
             if(colicion) break;
         }
+    }
+
+    float paredIzq(float pend, float x1,float y1,Ogre::Vector3 posicionCar){
+        float y2 = posicionCar.z + maxCar.z;
+        float x2 = ((y2 - y1 ) / pend ) + x1;
+        float minPosCx = posicionCar.x + minCar.x;
+        float difx =0.0;
+
+        printf("carro z %f\n", y2);
+        printf("punt pared z %f\n", y1);
+        printf("carro punta x %f\n", minPosCx);
+        printf("carro x %f\n", posicionCar.z);
+        printf("pendiete %f\n", pend);
+        printf("x final %f\n", x2);
+
+        //if( x2 > 0 ) x2 = - x2;
+        if(minPosCx < x2) {
+            difx = minPosCx - x2;
+            printf("diferencia %f\n", difx);
+        }
+        //
+        return difx;
     }
 
     bool frameStarted(const Ogre::FrameEvent &evt) {
@@ -275,11 +296,15 @@ public:
                 difx = 122 + posicionCar.x;
             }else if(posicionCar.z < 417.5 && posicionCar.x > 122){
                 difx = posicionCar.x - 122; 
-            }else if(posicionCar.z < 2222 && posicionCar.x > 201.9){
+            }else if(posicionCar.z < 2344 && posicionCar.x > 201.9){
                 difx = posicionCar.x - 201.9;
-            }else if(posicionCar.z < 2222 && posicionCar.x < -201.9){
+            }else if(posicionCar.z < 2344 && posicionCar.x < -201.9){
                 difx = 201.9 + posicionCar.x;
-            }else if(posicionCar.z < 2900){
+            }else if(posicionCar.z > 2344 && posicionCar.z < 2913 && posicionCar.x < -36.75){
+                difx = paredIzq(3.276, -211.9,2370.47,posicionCar);
+            //}else if(posicionCar.z > 2344 && posicionCar.z < 2913 && posicionCar.x < -36.75){
+            //    difx = paredIzq(3.276, -211.9,2370.47,posicionCar);
+            }else if(posicionCar.z < 2913){
             }else if(posicionCar.z < 4941.7 && posicionCar.x > 30.1){ //tunel
                 difx = posicionCar.x - 30.1;
             }else if(posicionCar.z < 4941.7 && posicionCar.x < -25.05){
@@ -321,16 +346,16 @@ public:
                 animationMeteoros[i]->addTime(evt.timeSinceLastFrame);
             }
 
+            //printf("carro z %f\n", posicionCar.z);
+            //printf("carro x %f\n", posicionCar.x);
+            //printf("carro y %f\n", posicionCar.y);
+            //printf("camara y %f\n", posicionCam.y);
+            //printf("camara z %f\n", posicionCam.z);
+            //printf("camara x %f\n", posicionCam.x);
+
             _cam->moveRelative(newPosCam);
             _nodoCarro->translate(newPosCar);
         }
-
-        //printf("carro z %f\n", posicionCar.z);
-        //printf("carro x %f\n", posicionCar.x);
-        //printf("carro y %f\n", posicionCar.y);
-        //printf("camara y %f\n", posicionCam.y);
-        //printf("camara z %f\n", posicionCam.z);
-        //printf("camara x %f\n", posicionCam.x);
 
         TextRenderer::getSingleton().setText("textoPuntaje", "Monedas: "+std::to_string(puntaje));
 
