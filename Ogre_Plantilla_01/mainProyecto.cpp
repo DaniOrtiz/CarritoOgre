@@ -141,6 +141,28 @@ public:
         return difx;
     }
 
+    float paredDer(float pend, float x1,float y1,Ogre::Vector3 posicionCar){
+        float y2 = posicionCar.z + maxCar.z;
+        float x2 = ((y2 - y1 ) / pend ) + x1;
+        float minPosCx = posicionCar.x + maxCar.x;
+        float difx =0.0;
+
+        printf("carro z %f\n", y2);
+        printf("punt pared z %f\n", y1);
+        printf("carro punta x %f\n", minPosCx);
+        printf("carro x %f\n", posicionCar.z);
+        printf("pendiete %f\n", pend);
+        printf("x final %f\n", x2);
+
+        //if( x2 > 0 ) x2 = - x2;
+        if(minPosCx > x2) {
+            difx = minPosCx - x2;
+            printf("diferencia %f\n", difx);
+        }
+        //
+        return difx;
+    }
+
     bool frameStarted(const Ogre::FrameEvent &evt) {
             
         _key->capture();
@@ -302,8 +324,8 @@ public:
                 difx = 201.9 + posicionCar.x;
             }else if(posicionCar.z > 2344 && posicionCar.z < 2913 && posicionCar.x < -36.75){
                 difx = paredIzq(3.276, -211.9,2370.47,posicionCar);
-            //}else if(posicionCar.z > 2344 && posicionCar.z < 2913 && posicionCar.x < -36.75){
-            //    difx = paredIzq(3.276, -211.9,2370.47,posicionCar);
+            }else if(posicionCar.z > 2344 && posicionCar.z < 2913 && posicionCar.x > 42.26){
+                difx = paredDer(-3.4, 211.9,2370.47,posicionCar);
             }else if(posicionCar.z < 2913){
             }else if(posicionCar.z < 4941.7 && posicionCar.x > 30.1){ //tunel
                 difx = posicionCar.x - 30.1;
@@ -446,15 +468,16 @@ public:
         LuzPuntual02->setDirection(Ogre::Vector3( -1, -1, -1 ));
 
         // Luces del tunel
-        Ogre::Light* LucesTunel[10];
+        Ogre::Light* LucesTunel[6];
         int posicion = 3050;
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 6; ++i) {
             LucesTunel[i] = mSceneMgr->createLight();
             LucesTunel[i]->setType(Ogre::Light::LT_POINT);
-            LucesTunel[i]->setDiffuseColour(50.0,50.0,50.0);
-            LucesTunel[i]->setPosition(Ogre::Vector3(0.0,3.5,posicion));
+            LucesTunel[i]->setDiffuseColour(4.0,4.0,4.0);
+            LucesTunel[i]->setSpecularColour(1.0,1.0,1.0);
+            LucesTunel[i]->setPosition(Ogre::Vector3(0,35,posicion));
             LucesTunel[i]->setCastShadows(false);
-            LucesTunel[i]->setAttenuation(65, 1.0, 0.07, 0.017);
+            LucesTunel[i]->setAttenuation(3250, 1.0, 0.0014, 0.000007);
 
             posicion = posicion + 200;
         }
@@ -900,7 +923,7 @@ public:
         Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
         entLuna->setMaterialName("Rocasycolor/Luna");
         nodoLuna->attachObject(entLuna);
-        nodoLuna->setScale(0.1,0.1,0.1);
+        nodoLuna->setScale(0.3,0.3,0.3);
         nodoLuna->setPosition(0,200,10000);       
 
         Ogre::ParticleSystem* partSystem = mSceneMgr->createParticleSystem("FuegosArtificiales","Examples/Fireworks");
