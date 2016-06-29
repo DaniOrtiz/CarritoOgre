@@ -26,6 +26,9 @@ bool final = false;
 Ogre::Vector3 minCar;
 Ogre::Vector3 maxCar;
 
+//obstaculos
+Ogre::SceneNode* nodosObstaculos[12];
+
 //rocas
 Ogre::SceneNode* nodosRocas[16];
 Ogre::AnimationState* animationMeteoros[16];
@@ -38,6 +41,7 @@ Ogre::SceneNode* nodoMonedas[20];
 bool atrapada[20];
 
 int puntaje = 0;
+Ogre::SceneNode* nodoPlano;
 
 class FrameListenerClase : public Ogre::FrameListener { // Hereda de la clase FrameListener de Ogre, escucha algo
 
@@ -94,7 +98,7 @@ public:
 
     //colision monedas
     void colisionMonedas(int i, int f, Ogre::Vector3 posicionCar){
-        bool colicion=false;
+        bool colision=false;
         //variable para las colisiones
         float minPosCx = posicionCar.x + minCar.x;
         float maxPosCx = posicionCar.x + maxCar.x;
@@ -110,13 +114,39 @@ public:
               && maxPosCx >= posMoneda.x && minPosCx <= posMoneda.x
               && maxPosCy >= posMoneda.y && minPosCy <= posMoneda.y
               && maxPosCz >= posMoneda.z && minPosCz <= posMoneda.z){
-                colicion = true;
+                colision = true;
                 puntaje += 1;
                 nodoMonedas[j]->setVisible(false);
                 atrapada[j] = true;
             }
-            if(colicion) break;
+            if(colision) break;
         }
+    }
+
+    //colision obstaculo
+    bool colisionObstaculo(int i, int f, Ogre::Vector3 posicionCar){
+        bool colision=false;
+        //variable para las colisiones
+        float minPosCx = posicionCar.x + minCar.x;
+        float maxPosCx = posicionCar.x + maxCar.x;
+        float minPosCy = posicionCar.y + minCar.y;
+        float maxPosCy = posicionCar.y + maxCar.y;
+        float minPosCz = posicionCar.z + minCar.z;
+        float maxPosCz = posicionCar.z + maxCar.z;
+
+        for(int j=i; j<f; j++){
+            Ogre::Vector3 posObs = nodosObstaculos[j]->getPosition();
+
+            if(!atrapada[j] 
+              && maxPosCx >= posObs.x && minPosCx <= posObs.x
+              && maxPosCy >= posObs.y && minPosCy <= posObs.y
+              && maxPosCz >= posObs.z && minPosCz <= posObs.z){
+                colision = true;
+            }
+            if(colision) break;
+        }
+
+        return colision;
     }
 
     float paredV(float pend, float x1,float y1,
@@ -126,19 +156,10 @@ public:
         float minPosCx = posicionCar.x + carX;
         float difx =0.0;
 
-        printf("carro z %f\n", y2);
-        printf("punt pared z %f\n", y1);
-        printf("carro punta x %f\n", minPosCx);
-        printf("carro x %f\n", posicionCar.z);
-        printf("pendiete %f\n", pend);
-        printf("x final %f\n", x2);
-
         if(minPosCx < x2 && mayor) {
             difx = minPosCx - x2;
-            printf("diferencia %f\n", difx);
         }else if(minPosCx > x2 && !mayor) {
             difx = minPosCx - x2;
-            printf("diferencia %f\n", difx);
         }
         return difx;
     }
@@ -160,6 +181,7 @@ public:
 
         if(posicionCar.z > 10330){
             final = true;
+            nodoPlano->setVisible(true);
         }else if(posicionCar.z > 6515){ //animacion carro
             for(int i =0; i <6 ; i++){
                 if(!enEspacio){
@@ -172,9 +194,42 @@ public:
             enEspacio = true;
         }
 
+        bool colision=false;
+        if(posicionCar.z < 700 && posicionCar.z > 600){
+            colision = colisionObstaculo(0,4,posicionCar);
+        }else if(posicionCar.z < 1800 && posicionCar.z > 1700){
+            colision = colisionObstaculo(4,8,posicionCar);
+        }else if(posicionCar.z < 5900 && posicionCar.z > 5800){
+            colision = colisionObstaculo(8,12,posicionCar);
+        }else if(posicionCar.z > 6530){
+            float minPosCx = posicionCar.x + minCar.x;
+            float maxPosCx = posicionCar.x + maxCar.x;
+            float minPosCy = posicionCar.y + minCar.y;
+            float maxPosCy = posicionCar.y + maxCar.y;
+            float minPosCz = posicionCar.z + minCar.z;
+            float maxPosCz = posicionCar.z + maxCar.z;
+
+            for(int i=0; i<16; i++){
+                Ogre::Vector3 posRoca = nodosRocas[i]->getPosition();
+                
+                if(maxPosCx >= posRoca.x && minPosCx <= posRoca.x
+                  && maxPosCy >= posRoca.y && minPosCy <= posRoca.y
+                  && maxPosCz >= posRoca.z && minPosCz <= posRoca.z){
+                    colision = true;
+                }
+                if(colision) break;
+            }
+        }
+
+        if(colision){ 
+            final = true;
+            nodoPlano->setVisible(true);
+        }
+
         if (_key->isKeyDown(OIS::KC_ESCAPE)) return false;
         
         if(final){
+            
             if(_key->isKeyDown(OIS::KC_SPACE)){ 
                 _nodoCarro->setPosition(0,0,0);
                 _cam->setPosition(0,20,-100);
@@ -192,7 +247,22 @@ public:
                 }
                 enEspacio = false;
                 final = false;
+                nodoPlano->setVisible(false);
             }
+
+            /*
+            if(posicionCar.z > 10330){
+                TextRenderer::getSingleton().addTextBox("textoWin", "Felicidades!", 250, 150, 50, 20, Ogre::ColourValue::White);
+                TextRenderer::getSingleton().setText("textoWin", "Felicidades!");
+            }
+            else{
+                TextRenderer::getSingleton().addTextBox("textoGO", "Game Over", 260, 150, 50, 20, Ogre::ColourValue::White);
+                TextRenderer::getSingleton().setText("textoGO", "Game Over");
+            }
+            TextRenderer::getSingleton().addTextBox("textoR", "Presione space para reiniciar el juego.",30,200,40,20,Ogre::ColourValue::White);
+            TextRenderer::getSingleton().setText("textoR", "Presione space para reiniciar el juego.");
+        */
+
         }else{
             // Si presionamos la tecla w
             if(_key->isKeyDown(OIS::KC_W)){     
@@ -254,29 +324,7 @@ public:
                 else if(posicionCar.y < -30) dify = posicionCar.y + 30;
                 
                 newPosCar.y -= dify;
-                newPosCam.y -= dify;                
-
-                //variable para las colisiones
-                float minPosCx = posicionCar.x + minCar.x;
-                float maxPosCx = posicionCar.x + maxCar.x;
-                float minPosCy = posicionCar.y + minCar.y;
-                float maxPosCy = posicionCar.y + maxCar.y;
-                float minPosCz = posicionCar.z + minCar.z;
-                float maxPosCz = posicionCar.z + maxCar.z;
-
-                bool colicion =false;
-
-                for(int i=0; i<16; i++){
-                    Ogre::Vector3 posRoca = nodosRocas[i]->getPosition();
-                    
-                    if(maxPosCx >= posRoca.x && minPosCx <= posRoca.x
-                      && maxPosCy >= posRoca.y && minPosCy <= posRoca.y
-                      && maxPosCz >= posRoca.z && minPosCz <= posRoca.z){
-                        printf("colision roca\n");
-                        colicion = true;
-                    }
-                    if(colicion) break;
-                }
+                newPosCam.y -= dify;        
             }
            
             //colisiones
@@ -290,7 +338,7 @@ public:
                 colisionMonedas(13,15,posicionCar);
             }else if(posicionCar.z < 10305 && posicionCar.z > 6535){
                 colisionMonedas(15,20,posicionCar);
-            }            
+            }     
 
             //desplazamiento en x
             float difx = 0.0;
@@ -438,6 +486,23 @@ public:
         manualAlaBorde->convertToMesh("MeshAlaBorde");
     }
 
+    void planoMesh(){
+        ManualObject* manualPlano = mSceneMgr->createManualObject("manualPlano");
+        manualPlano->begin("Cubito/TransparentTest", RenderOperation::OT_TRIANGLE_STRIP);
+
+            manualPlano->position(-50,-100, -50);
+            manualPlano->position(-50, 100, -50);
+            manualPlano->position(50, -100, -50);
+            manualPlano->position(50, 100, -50);
+
+            for(int i = 0; i < 4; i++){
+                manualPlano->index(i);
+            }
+
+        manualPlano->end();
+        manualPlano->convertToMesh("MeshPlano");
+    }
+
     void createScene(){
         // Luces Puntuales
         Ogre::Light* LuzPuntual01 = mSceneMgr->createLight("Luz01");
@@ -491,15 +556,18 @@ public:
         _entChasis01->setMaterialName("shCarro01");
         _nodeChasis01->attachObject(_entChasis01);
 
-        Ogre::AxisAlignedBox charAABBCar = _entChasis01->getBoundingBox();//getCarorldBoundingBox();
+        Ogre::AxisAlignedBox charAABBCar = _entChasis01->getBoundingBox();
         minCar = charAABBCar.getMinimum();
         maxCar = charAABBCar.getMaximum();
-        Ogre::Vector3 centerCar = charAABBCar.getCenter();
-        Ogre::Vector3 sizeCar( fabs( maxCar.x - minCar.x), fabs( maxCar.y - minCar.y), fabs( maxCar.z - minCar.z ) );
-        printf ("max (%f, %f, %f)\n", maxCar.x, maxCar.y, maxCar.z);
-        printf ("min (%f, %f, %f)\n", minCar.x, minCar.y, minCar.z);
-        printf ("center (%f, %f, %f)\n", centerCar.x, centerCar.y, centerCar.z);
-        printf ("carro is (%f, %f, %f)\n", sizeCar.x, sizeCar.y, sizeCar.z);
+
+        //plano
+        planoMesh();
+        Ogre::Entity* entPlano = mSceneMgr->createEntity("MeshPlano");
+        nodoPlano = mSceneMgr->createSceneNode("nodoPlano");
+        _nodeChasis01->addChild(nodoPlano);
+        nodoPlano->attachObject(entPlano);
+        entPlano->setCastShadows(false);
+        nodoPlano->setVisible(false);
 
         Ogre::Animation* animationCarR[4]; 
         Ogre::NodeAnimationTrack* trackCarR[4];
@@ -775,7 +843,6 @@ public:
         _nodeBFinal->attachObject(_entBanderaF);
         
         //Obstaculos
-        Ogre::SceneNode* nodosObstaculos[12];
         for (int i = 0; i < 12; i++) {
             nodosObstaculos[i] = mSceneMgr->createSceneNode("NodoObstaculo"+std::to_string(i+1));
             mSceneMgr->getRootSceneNode()->addChild(nodosObstaculos[i]);
@@ -906,7 +973,6 @@ public:
         mSceneMgr->getRootSceneNode()->addChild(nodoLuna);
         
         Ogre::Entity* entLuna = mSceneMgr->createEntity("Luna", "sphere.mesh");
-        entLuna->setMaterialName("Rocasycolor/Luna");
         nodoLuna->attachObject(entLuna);
         nodoLuna->setScale(0.3,0.3,0.3);
         nodoLuna->setPosition(0,200,10000);       
