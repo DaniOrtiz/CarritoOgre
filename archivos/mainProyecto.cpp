@@ -197,9 +197,9 @@ public:
         bool colision=false;
         if(posicionCar.z < 700 && posicionCar.z > 600){
             colision = colisionObstaculo(0,4,posicionCar);
-        }else if(posicionCar.z < 1800 && posicionCar.z > 1700){
+        }else if(posicionCar.z < 1900 && posicionCar.z > 1600){
             colision = colisionObstaculo(4,8,posicionCar);
-        }else if(posicionCar.z < 5900 && posicionCar.z > 5800){
+        }else if(posicionCar.z < 5970 && posicionCar.z > 5850){
             colision = colisionObstaculo(8,12,posicionCar);
         }else if(posicionCar.z > 6530){
             float minPosCx = posicionCar.x + minCar.x;
@@ -378,8 +378,7 @@ public:
                 difz = 429 - posicionCar.z;
                 newPosCar.z += difz;
                 newPosCam.z -= difz;
-            }else if(posicionCar.z < 6560 && 
-                    (posicionCar.y < 0 || posicionCar.y > 10)){
+            }else if(posicionCar.z <= 6530 && posicionCar.y != 0){
                 difz = 6530 - posicionCar.z;
                 newPosCar.z += difz;
                 newPosCam.z -= difz;
